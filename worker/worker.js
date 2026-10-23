@@ -2,7 +2,7 @@
 // Bindings: KV (KV-Namespace), AI (Workers AI)
 
 const ALLOWED_ORIGINS = ["https://kleinemaus.wenz.io", "http://localhost:8080"];
-const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+const MODEL = "@cf/deepseek-ai/deepseek-v4.1-flash-1017";
 const MAX_SCORE = 5000;
 
 function cors(req) {
@@ -92,32 +92,25 @@ async function trips(req, env) {
   if (destination.length < 2) return json(req, { error: "Wohin denn? 🗺️" }, 400);
   if (await limited(env, req, "trip", 6, 3600)) return json(req, { error: "Die Maus ist müde vom vielen Reisen. Probier es in einer Stunde nochmal! 😴" }, 429);
 
-  const ai = await env.AI.run(MODEL, {
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: `Reiseziel: ${destination}` },
-    ],
-    max_tokens: 400,
-    temperature: 0.9,
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        type: "object",
-        properties: {
-          place: { type: "string" }, emoji: { type: "string" }, title: { type: "string" },
-          text: { type: "string" }, mood: { type: "number" },
-        },
-        required: ["place", "emoji", "title", "text", "mood"],
-      },
-    },
-  });
-
-  let data = ai.response;
-  if (typeof data === "string") {
-    const m = data.match(/\{[\s\S]*\}/);
-    try { data = JSON.parse(m ? m[0] : data); } catch { data = null; }
+  // The model reasons before answering; if that eats the token budget the answer is empty, so retry once.
+  let data = null;
+  for (let attempt = 0; attempt < 2 && !data?.text; attempt++) {
+    const ai = await env.AI.run(MODEL, {
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `Reiseziel: ${destination}` },
+      ],
+      max_tokens: 2000,
+      temperature: 0.9,
+    });
+    // Models answer either in Workers AI format ({response}) or OpenAI format ({choices}).
+    data = ai.response ?? ai.choices?.[0]?.message?.content;
+    if (typeof data === "string") {
+      const m = data.match(/\{[\s\S]*\}/);
+      try { data = JSON.parse(m ? m[0] : data); } catch { data = null; }
+    }
   }
-  if (!data || !data.text) return json(req, { error: "Die Maus hat sich verlaufen. Nochmal versuchen? 🧭" }, 502);
+  if (!data?.text) return json(req, { error: "Die Maus hat sich verlaufen. Nochmal versuchen? 🧭" }, 502);
 
   const list = await getJSON(env, "trips", []);
   const trip = {
