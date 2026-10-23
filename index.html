@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Die kleine Maus auf Reisen</title>
+<meta name="description" content="Das Reisetagebuch einer sehr kleinen, sehr glücklichen Maus. Mit Käse-Minispiel.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐭</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff8ef;
+    --paper: #ffffff;
+    --ink: #3b2f2f;
+    --muted: #8a7a72;
+    --pink: #ff8fab;
+    --pink-soft: #ffe0e8;
+    --cheese: #ffc93c;
+    --cheese-dark: #e9a800;
+    --sky: #bde0fe;
+    --mint: #c7f0d8;
+    --shadow: 0 10px 30px rgba(120, 70, 40, .12);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Fredoka", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    background-image: radial-gradient(var(--pink-soft) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    overflow-x: hidden;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+
+  /* Hero */
+  header {
+    min-height: 92vh;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    position: relative;
+    padding: 40px 16px 80px;
+    background: linear-gradient(180deg, var(--sky) 0%, #e8f4ff 55%, transparent 100%);
+  }
+  .cloud {
+    position: absolute; background: #fff; border-radius: 999px; opacity: .9;
+    animation: drift linear infinite;
+  }
+  .cloud::before, .cloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
+  .cloud::before { width: 55%; height: 160%; left: 15%; top: -70%; }
+  .cloud::after { width: 40%; height: 130%; right: 12%; top: -45%; }
+  @keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
+  .hero-mouse { width: min(260px, 60vw); animation: bounce 2.4s ease-in-out infinite; cursor: pointer; }
+  @keyframes bounce { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-16px) rotate(2deg); } }
+  h1 {
+    font-size: clamp(2.3rem, 7vw, 4.4rem);
+    line-height: 1.05;
+    margin: 18px 0 8px;
+    letter-spacing: -.5px;
+  }
+  h1 span { color: var(--pink); }
+  .tagline { font-size: clamp(1.05rem, 2.6vw, 1.35rem); color: var(--muted); max-width: 560px; margin: 0 auto 26px; }
+  .btn {
+    display: inline-block; border: 0; cursor: pointer;
+    font: 600 1.1rem "Fredoka", sans-serif;
+    padding: 14px 26px; border-radius: 999px;
+    background: var(--pink); color: #fff; text-decoration: none;
+    box-shadow: 0 6px 0 #e06c8b;
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #e06c8b; }
+  .btn.cheese { background: var(--cheese); color: var(--ink); box-shadow: 0 6px 0 var(--cheese-dark); }
+  .btn.cheese:active { box-shadow: 0 2px 0 var(--cheese-dark); }
+  .btn-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .squeak {
+    position: absolute; font: 600 1.4rem "Caveat", cursive; color: var(--pink);
+    pointer-events: none; animation: pop 1s ease-out forwards;
+  }
+  @keyframes pop { from { opacity: 1; transform: translateY(0) scale(.6); } to { opacity: 0; transform: translateY(-60px) scale(1.3); } }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: -40px 0 50px; position: relative; }
+  .stat { background: var(--paper); border-radius: 20px; padding: 18px; text-align: center; box-shadow: var(--shadow); }
+  .stat b { display: block; font-size: 2rem; color: var(--pink); }
+  .stat small { color: var(--muted); }
+
+  h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); text-align: center; margin: 60px 0 6px; }
+  .sub { text-align: center; color: var(--muted); margin: 0 0 30px; }
+
+  /* Diary */
+  .diary { position: relative; display: grid; gap: 34px; }
+  .diary::before {
+    content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px;
+    background: repeating-linear-gradient(to bottom, var(--pink) 0 12px, transparent 12px 24px);
+    transform: translateX(-50%);
+  }
+  .entry {
+    position: relative; width: calc(50% - 34px);
+    background: var(--paper); border-radius: 24px; padding: 22px 22px 18px;
+    box-shadow: var(--shadow);
+    opacity: 0; transform: translateY(30px); transition: opacity .6s, transform .6s;
+  }
+  .entry.show { opacity: 1; transform: none; }
+  .entry:nth-child(odd) { justify-self: start; rotate: -1deg; }
+  .entry:nth-child(even) { justify-self: end; rotate: 1deg; }
+  .entry::after {
+    content: attr(data-pin); position: absolute; top: 18px; font-size: 1.7rem;
+    width: 46px; height: 46px; display: grid; place-items: center;
+    background: var(--paper); border-radius: 50%; box-shadow: var(--shadow);
+  }
+  .entry:nth-child(odd)::after { right: -57px; }
+  .entry:nth-child(even)::after { left: -57px; }
+  .entry .pic {
+    font-size: 4rem; height: 120px; border-radius: 16px; display: grid; place-items: center;
+    margin-bottom: 14px; position: relative; overflow: hidden;
+  }
+  .entry .day { font: 600 1.25rem "Caveat", cursive; color: var(--pink); }
+  .entry h3 { margin: 2px 0 8px; font-size: 1.4rem; }
+  .entry p { margin: 0 0 10px; line-height: 1.5; }
+  .mood { display: flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--muted); }
+  .mood-bar { flex: 1; height: 10px; background: var(--pink-soft); border-radius: 99px; overflow: hidden; }
+  .mood-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--pink), var(--cheese)); border-radius: 99px; }
+
+  /* Game */
+  .game-card {
+    background: var(--paper); border-radius: 28px; padding: 18px; box-shadow: var(--shadow);
+    max-width: 640px; margin: 0 auto;
+  }
+  .hud { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.1rem; padding: 4px 8px 12px; gap: 10px; flex-wrap: wrap; }
+  .hud .hearts { letter-spacing: 2px; }
+  #game {
+    width: 100%; aspect-ratio: 3 / 4; max-height: 70vh; display: block; margin: 0 auto;
+    border-radius: 20px; background: linear-gradient(180deg, #cdeafe, #fff3d6);
+    touch-action: none; cursor: none;
+  }
+  .game-help { text-align: center; color: var(--muted); font-size: .95rem; margin: 12px 0 2px; }
+
+  /* Postcard */
+  .postcard {
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 0;
+    background: #fffdf8; border-radius: 10px; box-shadow: var(--shadow);
+    padding: 26px; max-width: 760px; margin: 0 auto; rotate: -1.2deg;
+    border: 1px solid #f0e2d0;
+  }
+  .postcard .msg { font: 600 1.45rem/1.35 "Caveat", cursive; padding-right: 22px; border-right: 2px dashed #e4d3bf; }
+  .postcard .addr { padding-left: 22px; display: flex; flex-direction: column; justify-content: space-between; }
+  .stamp {
+    align-self: flex-end; width: 84px; height: 100px; display: grid; place-items: center; font-size: 2.6rem;
+    background: var(--pink-soft);
+    outline: 4px dotted #fff; outline-offset: -4px; rotate: 6deg;
+  }
+  .addr .line { border-bottom: 2px solid #e4d3bf; font: 600 1.35rem "Caveat", cursive; padding: 6px 0; }
+
+  footer { text-align: center; color: var(--muted); padding: 60px 16px 40px; font-size: .95rem; }
+  footer .ai { display: inline-block; margin-top: 8px; background: var(--paper); border-radius: 999px; padding: 8px 16px; box-shadow: var(--shadow); }
+
+  @media (max-width: 720px) {
+    .diary::before { left: 22px; }
+    .entry, .entry:nth-child(odd), .entry:nth-child(even) { width: auto; margin-left: 52px; justify-self: stretch; rotate: 0deg; }
+    .entry:nth-child(odd)::after, .entry:nth-child(even)::after { left: -53px; right: auto; width: 40px; height: 40px; font-size: 1.4rem; }
+    .postcard { grid-template-columns: 1fr; rotate: 0deg; }
+    .postcard .msg { border-right: 0; border-bottom: 2px dashed #e4d3bf; padding: 0 0 18px; }
+    .postcard .addr { padding: 18px 0 0; gap: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-mouse, .cloud { animation: none; }
+    .entry { transition: none; opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header id="top">
+  <div class="cloud" style="width:120px;height:40px;top:12%;animation-duration:48s;animation-delay:-10s"></div>
+  <div class="cloud" style="width:90px;height:30px;top:28%;animation-duration:62s;animation-delay:-35s"></div>
+  <div class="cloud" style="width:150px;height:46px;top:6%;animation-duration:75s;animation-delay:-50s"></div>
+  <div>
+    <svg class="hero-mouse" id="heroMouse" viewBox="0 0 200 200" aria-label="Eine kleine Maus mit Rucksack">
+      <!-- tail -->
+      <path d="M150 150 q40 10 30 -30 q-8 -25 10 -35" fill="none" stroke="#ff8fab" stroke-width="6" stroke-linecap="round"/>
+      <!-- backpack -->
+      <rect x="118" y="100" width="40" height="50" rx="12" fill="#ffc93c"/>
+      <rect x="124" y="112" width="28" height="12" rx="5" fill="#e9a800"/>
+      <!-- body -->
+      <ellipse cx="100" cy="135" rx="48" ry="44" fill="#c9bfbf"/>
+      <ellipse cx="100" cy="145" rx="28" ry="26" fill="#efe7e7"/>
+      <!-- ears -->
+      <circle cx="60" cy="55" r="30" fill="#c9bfbf"/>
+      <circle cx="60" cy="55" r="19" fill="#ffb3c6"/>
+      <circle cx="140" cy="55" r="30" fill="#c9bfbf"/>
+      <circle cx="140" cy="55" r="19" fill="#ffb3c6"/>
+      <!-- head -->
+      <ellipse cx="100" cy="88" rx="44" ry="40" fill="#d6cdcd"/>
+      <!-- hat -->
+      <path d="M68 58 q32 -34 64 0 z" fill="#ff8fab"/>
+      <rect x="62" y="54" width="76" height="9" rx="4" fill="#e06c8b"/>
+      <!-- eyes -->
+      <g id="eyes">
+        <ellipse cx="84" cy="86" rx="6" ry="8" fill="#3b2f2f"/>
+        <ellipse cx="116" cy="86" rx="6" ry="8" fill="#3b2f2f"/>
+        <circle cx="86" cy="83" r="2.2" fill="#fff"/>
+        <circle cx="118" cy="83" r="2.2" fill="#fff"/>
+      </g>
+      <!-- cheeks -->
+      <ellipse cx="72" cy="102" rx="8" ry="5" fill="#ffb3c6" opacity=".8"/>
+      <ellipse cx="128" cy="102" rx="8" ry="5" fill="#ffb3c6" opacity=".8"/>
+      <!-- nose + smile -->
+      <circle cx="100" cy="100" r="5" fill="#ff8fab"/>
+      <path d="M92 108 q8 8 16 0" fill="none" stroke="#3b2f2f" stroke-width="3" stroke-linecap="round"/>
+      <!-- whiskers -->
+      <g stroke="#8a7a72" stroke-width="2" stroke-linecap="round">
+        <line x1="78" y1="100" x2="52" y2="96"/><line x1="78" y1="104" x2="52" y2="108"/>
+        <line x1="122" y1="100" x2="148" y2="96"/><line x1="122" y1="104" x2="148" y2="108"/>
+      </g>
+      <!-- feet -->
+      <ellipse cx="80" cy="178" rx="14" ry="7" fill="#ffb3c6"/>
+      <ellipse cx="120" cy="178" rx="14" ry="7" fill="#ffb3c6"/>
+    </svg>
+    <h1>Die <span>kleine Maus</span><br>geht auf Reisen</h1>
+    <p class="tagline">Sie ist 9 cm groß, hat einen Rucksack voller Käse und absolut keinen Plan. Sie ist trotzdem (oder genau deswegen) die glücklichste Maus der Welt.</p>
+    <div class="btn-row">
+      <a class="btn" href="#tagebuch">📖 Zum Reisetagebuch</a>
+      <a class="btn cheese" href="#spiel">🧀 Direkt zum Spiel</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="stats" aria-label="Reisestatistik">
+    <div class="stat"><b id="km">0</b><small>Kilometer getrippelt</small></div>
+    <div class="stat"><b id="cheese">0</b><small>Käsesorten probiert</small></div>
+    <div class="stat"><b>∞</b><small>Glückslevel</small></div>
+    <div class="stat"><b>0</b><small>Katzen, die sie erwischt haben</small></div>
+  </section>
+
+  <section id="tagebuch">
+    <h2>📖 Das Reisetagebuch</h2>
+    <p class="sub">Original-Einträge, übersetzt aus dem Mäusischen (Piep → Deutsch)</p>
+
+    <div class="diary">
+      <article class="entry" data-pin="🏡">
+        <div class="pic" style="background:var(--mint)">🏡🎒</div>
+        <div class="day">Tag 1 · Zuhause</div>
+        <h3>Der große Aufbruch</h3>
+        <p>Rucksack gepackt: 14 Stück Käse, 1 Zahnbürste, 0 Landkarten. Habe mich vom Brotkrümel unterm Sofa verabschiedet. Er war sehr gefasst.</p>
+        <div class="mood">Laune <div class="mood-bar"><i style="width:88%"></i></div> 🥰</div>
+      </article>
+
+      <article class="entry" data-pin="🗼">
+        <div class="pic" style="background:#ffe5ec">🗼🥐</div>
+        <div class="day">Tag 4 · Paris</div>
+        <h3>Ooh là là, Camembert!</h3>
+        <p>Bin auf den Eiffelturm geklettert. Hat 3 Tage gedauert. Oben angekommen hat jemand ein Croissant fallen lassen. Ich glaube, das war Schicksal. Ich habe es adoptiert.</p>
+        <div class="mood">Laune <div class="mood-bar"><i style="width:95%"></i></div> 🤩</div>
+      </article>
+
+      <article class="entry" data-pin="🏔️">
+        <div class="pic" style="background:#e6f0ff">🏔️🧀</div>
+        <div class="day">Tag 9 · Schweizer Alpen</div>
+        <h3>Ein Käse mit Löchern?!</h3>
+        <p>Die Menschen hier machen Käse, in den man <i>reinkriechen</i> kann. Habe in einem Emmentaler übernachtet. Bestes Hotel meines Lebens. 5 von 5 Löchern.</p>
+        <div class="mood">Laune <div class="mood-bar"><i style="width:100%"></i></div> 😍</div>
+      </article>
+
+      <article class="entry" data-pin="🍕">
+        <div class="pic" style="background:#fff1d6">🍕🛵</div>
+        <div class="day">Tag 13 · Napoli</div>
+        <h3>Pizza ist eigentlich nur ein Käse-Teller</h3>
+        <p>Ein Pizzabäcker hat mich gesehen, laut „Mamma mia!“ gerufen und mir dann ein Stück Mozzarella geschenkt. Italiener sind sehr nett. Bin mit einer Vespa mitgefahren (im Korb).</p>
+        <div class="mood">Laune <div class="mood-bar"><i style="width:97%"></i></div> 🤌</div>
+      </article>
+
+      <article class="entry" data-pin="🌊">
+        <div class="pic" style="background:#d6f3ff">🏖️🦀</div>
+        <div class="day">Tag 18 · Am Meer</div>
+        <h3>Das Meer ist zu groß</h3>
+        <p>Habe mit einer Krabbe Freundschaft geschlossen. Sie läuft nur seitwärts, ich nur vorwärts. Wir haben uns trotzdem super verstanden. Habe eine Sandburg gebaut. Sie war 4 cm hoch. Für mich ein Wolkenkratzer.</p>
+        <div class="mood">Laune <div class="mood-bar"><i style="width:92%"></i></div> 😎</div>
+      </article>
+
+      <article class="entry" data-pin="🗾">
+        <div class="pic" style="background:#ffe9f1">🌸🍣</div>
+        <div class="day">Tag 25 · Tokio</div>
+        <h3>Alles ist so süß hier</h3>
+        <p>Jemand hat mich mit einem Glücksbringer verwechselt und Fotos gemacht. Jetzt bin ich auf 3.000 Handys. Habe zum ersten Mal Kirschblüten gesehen und vor Freude geniest. Hatschi! (Piep.)</p>
+        <div class="mood">Laune <div class="mood-bar"><i style="width:99%"></i></div> 🌸</div>
+      </article>
+
+      <article class="entry" data-pin="🌙">
+        <div class="pic" style="background:#2b2d5c;color:#fff">🚀🌕</div>
+        <div class="day">Tag 31 · Der Mond</div>
+        <h3>Die größte Enttäuschung</h3>
+        <p>Man hat mir mein ganzes Leben erzählt, der Mond sei aus Käse. Er ist aus Stein. Habe trotzdem reingebissen. Er schmeckt nach Stein. Die Aussicht war aber wunderschön, also ok.</p>
+        <div class="mood">Laune <div class="mood-bar"><i style="width:80%"></i></div> 🥲</div>
+      </article>
+
+      <article class="entry" data-pin="❤️">
+        <div class="pic" style="background:var(--pink-soft)">🏡❤️</div>
+        <div class="day">Tag 32 · Wieder zuhause</div>
+        <h3>Das Beste kommt zum Schluss</h3>
+        <p>Bin wieder unterm Sofa. Der Brotkrümel ist noch da. Wir haben uns lange angeschaut. Erkenntnis der Reise: Die Welt ist riesig, aber am schönsten ist es mit den Liebsten. Und mit Käse.</p>
+        <div class="mood">Laune <div class="mood-bar"><i style="width:100%"></i></div> 🥹</div>
+      </article>
+    </div>
+  </section>
+
+  <section id="spiel">
+    <h2>🧀 Minispiel: Käse-Regen!</h2>
+    <p class="sub">Hilf der kleinen Maus, Käse für die nächste Reise zu sammeln. Aber Achtung vor den Katzen!</p>
+    <div class="game-card">
+      <div class="hud">
+        <span>🧀 <span id="score">0</span></span>
+        <span class="hearts" id="hearts">❤️❤️❤️</span>
+        <span>🏆 <span id="best">0</span></span>
+      </div>
+      <canvas id="game" width="480" height="640" aria-label="Käse-Regen Spielfeld"></canvas>
+      <p class="game-help">Maus bewegen: Finger/Maus ziehen oder ← → Pfeiltasten. 🧀 = +1 · 🍰 = +5 · 🐱 = autsch</p>
+    </div>
+  </section>
+
+  <section id="postkarte">
+    <h2>💌 Eine Postkarte</h2>
+    <p class="sub">Kam heute an. Ein bisschen zerknittert, riecht nach Gouda.</p>
+    <div class="postcard">
+      <div class="msg">
+        Hallo du!<br><br>
+        Ich bin auf meiner Reise sehr weit herumgekommen und habe viel gesehen. Aber nichts davon war so schön wie der Gedanke, dass da jemand ist, der sich über diese Karte freut. 💕<br><br>
+        Piep piep (= hab dich lieb),<br>
+        deine kleine Maus 🐭
+      </div>
+      <div class="addr">
+        <div class="stamp">🐭</div>
+        <div>
+          <div class="line">An: die liebste Person</div>
+          <div class="line">Unterm Sofa 1</div>
+          <div class="line">Mäusehausen 🧀</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Keine Mäuse wurden für diese Webseite verletzt. Eine hat aber sehr viel Käse gegessen.<br>
+  <span class="ai">✨ Diese Seite (Texte, Bilder, Spiel &amp; Code) hat eine KI in ein paar Minuten gebaut ✨</span>
+</footer>
+
+<script>
+// --- squeaks when you click the hero mouse ---
+const squeaks = ["Piep!", "Quiek!", "Käse?", "Hihi!", "Piep piep!", "♥"];
+document.getElementById("heroMouse").addEventListener("click", e => {
+  const s = document.createElement("div");
+  s.className = "squeak";
+  s.textContent = squeaks[Math.floor(Math.random() * squeaks.length)];
+  s.style.left = e.pageX + "px";
+  s.style.top = e.pageY - 20 + "px";
+  document.body.appendChild(s);
+  setTimeout(() => s.remove(), 1000);
+});
+
+// --- blink ---
+const eyes = document.getElementById("eyes");
+setInterval(() => {
+  eyes.style.transform = "scaleY(.1)";
+  eyes.style.transformOrigin = "100px 86px";
+  setTimeout(() => (eyes.style.transform = ""), 140);
+}, 3200);
+
+// --- reveal diary entries + count stats ---
+const io = new IntersectionObserver(entries => {
+  entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add("show"); io.unobserve(en.target); } });
+}, { threshold: .15 });
+document.querySelectorAll(".entry").forEach(el => io.observe(el));
+
+function countUp(el, to, ms) {
+  const start = performance.now();
+  (function tick(t) {
+    const p = Math.min(1, (t - start) / ms);
+    el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))).toLocaleString("de-DE");
+    if (p < 1) requestAnimationFrame(tick);
+  })(start);
+}
+countUp(document.getElementById("km"), 384712, 2200);
+countUp(document.getElementById("cheese"), 47, 2200);
+
+// --- Minigame: Käse-Regen ---
+(() => {
+  const cv = document.getElementById("game");
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const scoreEl = document.getElementById("score");
+  const heartsEl = document.getElementById("hearts");
+  const bestEl = document.getElementById("best");
+  let best = 0;
+  try { best = +localStorage.getItem("kleinemaus-best") || 0; } catch (e) {}
+  bestEl.textContent = best;
+
+  const mouse = { x: W / 2, y: H - 60, w: 70, targetX: W / 2, squish: 0 };
+  let items = [], parts = [], score, lives, state = "start", spawnT, speed, time, flash = 0, keys = {};
+
+  function reset() {
+    items = []; parts = []; score = 0; lives = 3; spawnT = 0; speed = 1; time = 0;
+    mouse.x = mouse.targetX = W / 2;
+    updateHud();
+  }
+  function updateHud() {
+    scoreEl.textContent = score;
+    heartsEl.textContent = "❤️".repeat(lives) + "🤍".repeat(Math.max(0, 3 - lives));
+  }
+
+  function spawn() {
+    const r = Math.random();
+    const catChance = Math.min(.38, .15 + time / 3000);
+    const kind = r < catChance ? "cat" : r < catChance + .07 ? "cake" : "cheese";
+    items.push({
+      kind, x: 30 + Math.random() * (W - 60), y: -30,
+      vy: (2 + Math.random() * 1.6) * speed, rot: Math.random() * 6, vr: (Math.random() - .5) * .1
+    });
+  }
+
+  function burst(x, y, emoji) {
+    for (let i = 0; i < 8; i++) parts.push({ x, y, vx: (Math.random() - .5) * 6, vy: -Math.random() * 5 - 1, life: 40, emoji });
+  }
+
+  function drawMouse() {
+    const { x, y } = mouse;
+    const sq = mouse.squish;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(1 + sq * .15, 1 - sq * .15);
+    // tail
+    ctx.strokeStyle = "#ff8fab"; ctx.lineWidth = 4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(28, 12); ctx.quadraticCurveTo(55, 10, 50, -12); ctx.stroke();
+    // body
+    ctx.fillStyle = "#c9bfbf"; ctx.beginPath(); ctx.ellipse(0, 6, 32, 24, 0, 0, Math.PI * 2); ctx.fill();
+    // ears
+    for (const ex of [-20, 20]) {
+      ctx.fillStyle = "#c9bfbf"; ctx.beginPath(); ctx.arc(ex, -26, 15, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#ffb3c6"; ctx.beginPath(); ctx.arc(ex, -26, 9, 0, Math.PI * 2); ctx.fill();
+    }
+    // head
+    ctx.fillStyle = "#d6cdcd"; ctx.beginPath(); ctx.ellipse(0, -10, 24, 21, 0, 0, Math.PI * 2); ctx.fill();
+    // eyes
+    ctx.fillStyle = "#3b2f2f";
+    const hurt = flash > 0;
+    if (hurt) {
+      ctx.font = "bold 12px Fredoka"; ctx.textAlign = "center"; ctx.fillText("× ×", 0, -10);
+    } else {
+      ctx.beginPath(); ctx.ellipse(-8, -12, 3.5, 4.5, 0, 0, Math.PI * 2); ctx.ellipse(8, -12, 3.5, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    // nose
+    ctx.fillStyle = "#ff8fab"; ctx.beginPath(); ctx.arc(0, -2, 3.5, 0, Math.PI * 2); ctx.fill();
+    // cheeks
+    ctx.globalAlpha = .7; ctx.fillStyle = "#ffb3c6";
+    ctx.beginPath(); ctx.ellipse(-15, -3, 5, 3, 0, 0, Math.PI * 2); ctx.ellipse(15, -3, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawGround() {
+    ctx.fillStyle = "#b8e6a8"; ctx.fillRect(0, H - 26, W, 26);
+    ctx.fillStyle = "#9bd68a";
+    for (let i = 0; i < W; i += 24) { ctx.beginPath(); ctx.arc(i + 12, H - 26, 12, Math.PI, 0); ctx.fill(); }
+  }
+
+  function centerText(lines) {
+    ctx.fillStyle = "rgba(255,255,255,.85)";
+    ctx.beginPath(); ctx.roundRect(40, H / 2 - 120, W - 80, 220, 24); ctx.fill();
+    ctx.fillStyle = "#3b2f2f"; ctx.textAlign = "center";
+    lines.forEach(([txt, size, y]) => { ctx.font = `600 ${size}px Fredoka, sans-serif`; ctx.fillText(txt, W / 2, H / 2 + y); });
+  }
+
+  const gameOverLines = [
+    "Die Maus ist satt und müde.",
+    "Zeit für ein Nickerchen im Käse.",
+    "Die Katze war heute zu schnell.",
+    "Morgen wird weiter gesammelt!"
+  ];
+  let goLine = gameOverLines[0];
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    drawGround();
+
+    if (state === "play") {
+      time++;
+      speed = 1 + time / 1800;
+      spawnT -= 1;
+      if (spawnT <= 0) { spawn(); spawnT = Math.max(16, 48 - time / 60); }
+
+      if (keys.ArrowLeft) mouse.targetX -= 9;
+      if (keys.ArrowRight) mouse.targetX += 9;
+      mouse.targetX = Math.max(35, Math.min(W - 35, mouse.targetX));
+      mouse.x += (mouse.targetX - mouse.x) * .3;
+      mouse.squish *= .85;
+      if (flash > 0) flash--;
+
+      for (const it of items) {
+        it.y += it.vy; it.rot += it.vr;
+        const dx = Math.abs(it.x - mouse.x), dy = Math.abs(it.y - mouse.y);
+        if (!it.dead && dx < 42 && dy < 36) {
+          it.dead = true;
+          if (it.kind === "cat") {
+            lives--; flash = 40; burst(it.x, it.y, "💥");
+            if (navigator.vibrate) navigator.vibrate(120);
+            if (lives <= 0) {
+              state = "over";
+              goLine = gameOverLines[Math.floor(Math.random() * gameOverLines.length)];
+              if (score > best) { best = score; try { localStorage.setItem("kleinemaus-best", best); } catch (e) {} bestEl.textContent = best; }
+            }
+          } else {
+            score += it.kind === "cake" ? 5 : 1; mouse.squish = 1;
+            burst(it.x, it.y, it.kind === "cake" ? "✨" : "⭐");
+          }
+          updateHud();
+        }
+      }
+      items = items.filter(it => !it.dead && it.y < H + 40);
+    }
+
+    for (const it of items) {
+      ctx.save(); ctx.translate(it.x, it.y); ctx.rotate(it.kind === "cat" ? Math.sin(it.rot) * .3 : it.rot);
+      ctx.font = it.kind === "cat" ? "44px serif" : "38px serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(it.kind === "cat" ? "🐱" : it.kind === "cake" ? "🍰" : "🧀", 0, 0);
+      ctx.restore();
+    }
+    for (const p of parts) {
+      p.x += p.vx; p.y += p.vy; p.vy += .25; p.life--;
+      ctx.globalAlpha = p.life / 40; ctx.font = "18px serif"; ctx.textAlign = "center";
+      ctx.fillText(p.emoji, p.x, p.y); ctx.globalAlpha = 1;
+    }
+    parts = parts.filter(p => p.life > 0);
+
+    if (flash % 8 < 4) drawMouse();
+
+    if (state === "start") {
+      centerText([["🐭 Käse-Regen", 38, -60], ["Sammle 🧀 und 🍰", 22, -10], ["Weiche den 🐱 aus!", 22, 22], ["Tippen zum Starten", 20, 72]]);
+    } else if (state === "over") {
+      centerText([["Spiel vorbei!", 36, -62], [goLine, 19, -22], [`${score} Käse gesammelt` + (score >= best && score > 0 ? " 🏆" : ""), 24, 18], ["Tippen für nochmal", 20, 72]]);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function toCanvasX(clientX) {
+    const r = cv.getBoundingClientRect();
+    return (clientX - r.left) * (W / r.width);
+  }
+  function start() { if (state !== "play") { reset(); state = "play"; } }
+
+  cv.addEventListener("pointerdown", e => { start(); mouse.targetX = toCanvasX(e.clientX); });
+  cv.addEventListener("pointermove", e => { if (state === "play") mouse.targetX = toCanvasX(e.clientX); });
+  window.addEventListener("keydown", e => {
+    if (!["ArrowLeft", "ArrowRight", " "].includes(e.key)) return;
+    const r = cv.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    e.preventDefault();
+    if (e.key === " ") start(); else { keys[e.key] = true; start(); }
+  });
+  window.addEventListener("keyup", e => { keys[e.key] = false; });
+
+  reset();
+  loop();
+})();
+</script>
+</body>
+</html>
