@@ -4,8 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Die kleine Maus auf Reisen</title>
-<meta name="description" content="Das Reisetagebuch einer sehr kleinen, sehr glücklichen Maus. Mit Käse-Minispiel.">
+<meta name="description" content="Das Reisetagebuch einer sehr kleinen, sehr glücklichen Maus. Mit Käse-Minispiel, Kleiderschrank und KI-Reisewünschen.">
+<meta name="theme-color" content="#ffb3c6">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kleinemaus.wenz.io/">
+<meta property="og:title" content="🐭 Die kleine Maus geht auf Reisen">
+<meta property="og:description" content="9 cm groß, Rucksack voller Käse, absolut kein Plan – und die glücklichste Maus der Welt. Spiel mit und schick sie auf Reisen!">
+<meta property="og:image" content="https://kleinemaus.wenz.io/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="de_DE">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐭</text></svg>">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
@@ -16,6 +27,7 @@
     --ink: #3b2f2f;
     --muted: #8a7a72;
     --pink: #ff8fab;
+    --pink-dark: #e06c8b;
     --pink-soft: #ffe0e8;
     --cheese: #ffc93c;
     --cheese-dark: #e9a800;
@@ -35,7 +47,23 @@
     overflow-x: hidden;
   }
   a { color: inherit; }
+  button, input { font-family: inherit; }
   .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+
+  /* Mouse SVG (shared by hero + Maus-Ecke) */
+  .mouse-svg .fur { fill: var(--fur, #c9bfbf); }
+  .mouse-svg .head { fill: var(--head, #d6cdcd); }
+  .mouse-svg .belly { fill: var(--belly, #efe7e7); }
+  .mouse-svg .eyes { transform-box: fill-box; transform-origin: center; transition: transform .08s; }
+  .mouse-svg.blink .eyes { transform: scaleY(.1); }
+  .mouse-svg .pupils { transition: transform .15s ease-out; }
+  .mouse-svg .cheek { transition: opacity .3s, transform .3s; transform-box: fill-box; transform-origin: center; }
+  .mouse-svg.blush .cheek { opacity: 1 !important; transform: scale(1.5); }
+  .mouse-svg text { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+  .mouse-svg.chomp { animation: chomp .5s ease-in-out; }
+  @keyframes chomp { 0%,100% { transform: scale(1); } 25% { transform: scale(1.08, .92); } 50% { transform: scale(.95, 1.05); } 75% { transform: scale(1.06, .94); } }
+  .mouse-svg.wiggle { animation: wiggle .6s ease-in-out; }
+  @keyframes wiggle { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
 
   /* Hero */
   header {
@@ -56,7 +84,8 @@
   .cloud::before { width: 55%; height: 160%; left: 15%; top: -70%; }
   .cloud::after { width: 40%; height: 130%; right: 12%; top: -45%; }
   @keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
-  .hero-mouse { width: min(260px, 60vw); animation: bounce 2.4s ease-in-out infinite; cursor: pointer; }
+  .hero-mouse { width: min(260px, 60vw); margin: 0 auto; animation: bounce 2.4s ease-in-out infinite; cursor: pointer; }
+  .hero-mouse svg { width: 100%; display: block; overflow: visible; }
   @keyframes bounce { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-16px) rotate(2deg); } }
   h1 {
     font-size: clamp(2.3rem, 7vw, 4.4rem);
@@ -71,16 +100,19 @@
     font: 600 1.1rem "Fredoka", sans-serif;
     padding: 14px 26px; border-radius: 999px;
     background: var(--pink); color: #fff; text-decoration: none;
-    box-shadow: 0 6px 0 #e06c8b;
-    transition: transform .1s, box-shadow .1s;
+    box-shadow: 0 6px 0 var(--pink-dark);
+    transition: transform .1s, box-shadow .1s, opacity .2s;
   }
-  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #e06c8b; }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--pink-dark); }
+  .btn:disabled { opacity: .55; cursor: wait; }
   .btn.cheese { background: var(--cheese); color: var(--ink); box-shadow: 0 6px 0 var(--cheese-dark); }
   .btn.cheese:active { box-shadow: 0 2px 0 var(--cheese-dark); }
+  .btn.small { font-size: 1rem; padding: 10px 18px; box-shadow: 0 4px 0 var(--pink-dark); }
+  .btn.small.cheese { box-shadow: 0 4px 0 var(--cheese-dark); }
   .btn-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
   .squeak {
     position: absolute; font: 600 1.4rem "Caveat", cursive; color: var(--pink);
-    pointer-events: none; animation: pop 1s ease-out forwards;
+    pointer-events: none; animation: pop 1s ease-out forwards; z-index: 50;
   }
   @keyframes pop { from { opacity: 1; transform: translateY(0) scale(.6); } to { opacity: 0; transform: translateY(-60px) scale(1.3); } }
 
@@ -90,8 +122,40 @@
   .stat b { display: block; font-size: 2rem; color: var(--pink); }
   .stat small { color: var(--muted); }
 
-  h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); text-align: center; margin: 60px 0 6px; }
+  h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); text-align: center; margin: 70px 0 6px; }
   .sub { text-align: center; color: var(--muted); margin: 0 0 30px; }
+  .card { background: var(--paper); border-radius: 28px; padding: 22px; box-shadow: var(--shadow); }
+
+  /* Maus-Ecke */
+  .care { display: grid; grid-template-columns: 300px 1fr; gap: 26px; align-items: center; }
+  .care-stage { position: relative; text-align: center; }
+  .care-stage .mouse-svg { width: 220px; overflow: visible; }
+  .bubble {
+    position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff; font-weight: 600; font-size: .95rem;
+    padding: 8px 14px; border-radius: 16px; white-space: nowrap;
+    opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none;
+  }
+  .bubble::after { content: ""; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-top-color: var(--ink); border-bottom: 0; }
+  .bubble.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+  .meters { display: grid; gap: 10px; margin: 12px auto 0; max-width: 240px; }
+  .meter { display: flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--muted); }
+  .meter .bar { flex: 1; height: 12px; background: var(--pink-soft); border-radius: 99px; overflow: hidden; }
+  .meter .bar i { display: block; height: 100%; border-radius: 99px; transition: width .4s; }
+  .care-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .global { color: var(--muted); font-size: .92rem; margin: -6px 0 18px; }
+  .wardrobe h3 { margin: 14px 0 8px; font-size: 1.05rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 2px solid var(--pink-soft); background: #fff; border-radius: 999px;
+    padding: 7px 13px; cursor: pointer; font-size: .98rem; color: var(--ink);
+    transition: background .15s, border-color .15s, transform .1s;
+  }
+  .chip:hover { border-color: var(--pink); }
+  .chip:active { transform: scale(.95); }
+  .chip[aria-pressed="true"] { background: var(--pink); border-color: var(--pink); color: #fff; }
+  .swatch { width: 16px; height: 16px; border-radius: 50%; display: inline-block; vertical-align: -3px; margin-right: 5px; border: 2px solid rgba(0,0,0,.08); }
+  .flying { position: fixed; font-size: 2rem; pointer-events: none; z-index: 60; transition: transform .55s cubic-bezier(.5,-0.4,.6,1), opacity .2s .5s; }
 
   /* Diary */
   .diary { position: relative; display: grid; gap: 34px; }
@@ -107,15 +171,15 @@
     opacity: 0; transform: translateY(30px); transition: opacity .6s, transform .6s;
   }
   .entry.show { opacity: 1; transform: none; }
-  .entry:nth-child(odd) { justify-self: start; rotate: -1deg; }
-  .entry:nth-child(even) { justify-self: end; rotate: 1deg; }
-  .entry::after {
+  .diary .entry:nth-child(odd) { justify-self: start; rotate: -1deg; }
+  .diary .entry:nth-child(even) { justify-self: end; rotate: 1deg; }
+  .diary .entry::after {
     content: attr(data-pin); position: absolute; top: 18px; font-size: 1.7rem;
     width: 46px; height: 46px; display: grid; place-items: center;
     background: var(--paper); border-radius: 50%; box-shadow: var(--shadow);
   }
-  .entry:nth-child(odd)::after { right: -57px; }
-  .entry:nth-child(even)::after { left: -57px; }
+  .diary .entry:nth-child(odd)::after { right: -57px; }
+  .diary .entry:nth-child(even)::after { left: -57px; }
   .entry .pic {
     font-size: 4rem; height: 120px; border-radius: 16px; display: grid; place-items: center;
     margin-bottom: 14px; position: relative; overflow: hidden;
@@ -127,19 +191,63 @@
   .mood-bar { flex: 1; height: 10px; background: var(--pink-soft); border-radius: 99px; overflow: hidden; }
   .mood-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--pink), var(--cheese)); border-radius: 99px; }
 
-  /* Game */
-  .game-card {
-    background: var(--paper); border-radius: 28px; padding: 18px; box-shadow: var(--shadow);
-    max-width: 640px; margin: 0 auto;
+  /* Reisewunsch (KI) */
+  .wish-form { display: flex; gap: 10px; flex-wrap: wrap; }
+  .wish-form input {
+    flex: 1 1 220px; min-width: 0; font-size: 1.1rem; padding: 13px 18px;
+    border: 2px solid var(--pink-soft); border-radius: 999px; outline: none; color: var(--ink);
   }
-  .hud { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.1rem; padding: 4px 8px 12px; gap: 10px; flex-wrap: wrap; }
-  .hud .hearts { letter-spacing: 2px; }
+  .wish-form input:focus { border-color: var(--pink); }
+  .wish-chips { margin-top: 12px; }
+  .ai-note { color: var(--muted); font-size: .88rem; margin: 12px 4px 0; }
+  .loading { display: none; text-align: center; padding: 28px 10px 6px; }
+  .loading.on { display: block; }
+  .loading .packer { font-size: 3rem; display: inline-block; animation: wiggle .8s ease-in-out infinite; }
+  .loading p { color: var(--muted); margin: 8px 0 0; }
+  .wish-error { color: #c2410c; text-align: center; margin: 12px 0 0; min-height: 1.2em; }
+  .trips { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; margin-top: 24px; }
+  .trips .entry { width: auto; opacity: 1; transform: none; }
+  .trips .entry.new { animation: arrive .7s cubic-bezier(.2,1.6,.4,1); outline: 3px solid var(--cheese); }
+  @keyframes arrive { from { transform: scale(.6) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  .trips .wished { font-size: .85rem; color: var(--muted); margin-bottom: 8px; }
+  .trips .pic { height: 96px; font-size: 3.2rem; }
+  .caret::after { content: "▍"; animation: caret .8s steps(1) infinite; color: var(--pink); }
+  @keyframes caret { 50% { opacity: 0; } }
+  .trips-empty { text-align: center; color: var(--muted); grid-column: 1 / -1; }
+
+  /* Game */
+  .game-card { max-width: 640px; margin: 0 auto; padding: 18px; }
+  .hud { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.1rem; padding: 4px 8px 12px; gap: 10px; }
+  .hud .hearts { letter-spacing: 1px; }
+  .icon-btn { background: var(--pink-soft); border: 0; border-radius: 50%; width: 38px; height: 38px; font-size: 1.1rem; cursor: pointer; }
+  .stage { position: relative; }
   #game {
     width: 100%; aspect-ratio: 3 / 4; max-height: 70vh; display: block; margin: 0 auto;
-    border-radius: 20px; background: linear-gradient(180deg, #cdeafe, #fff3d6);
+    border-radius: 20px; background: #cdeafe;
     touch-action: none; cursor: none;
   }
-  .game-help { text-align: center; color: var(--muted); font-size: .95rem; margin: 12px 0 2px; }
+  .overlay {
+    position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+    background: rgba(255, 248, 239, .82); backdrop-filter: blur(3px); border-radius: 20px; padding: 20px;
+  }
+  .overlay[hidden] { display: none; }
+  .overlay h3 { font-size: 2rem; margin: 0 0 4px; }
+  .overlay p { margin: 4px 0; }
+  .overlay .big { font-size: 1.5rem; font-weight: 700; color: var(--pink); }
+  .overlay form[hidden] { display: none; }
+  .overlay form { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 16px 0 8px; }
+  .overlay input { font-size: 1.05rem; padding: 10px 16px; border-radius: 999px; border: 2px solid var(--pink-soft); outline: none; width: 190px; }
+  .overlay input:focus { border-color: var(--pink); }
+  .ov-msg { min-height: 1.3em; color: var(--muted); font-size: .95rem; }
+  .game-help { text-align: center; color: var(--muted); font-size: .95rem; margin: 12px 0 2px; line-height: 1.6; }
+  .board { margin-top: 18px; border-top: 2px dashed var(--pink-soft); padding-top: 14px; }
+  .board h3 { text-align: center; margin: 0 0 10px; }
+  .board ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .board li { display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 14px; background: #fffaf3; }
+  .board li.me { background: var(--pink-soft); font-weight: 700; }
+  .board li .r { font-weight: 700; text-align: center; }
+  .board li .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .board .empty { text-align: center; color: var(--muted); display: block; background: none; }
 
   /* Postcard */
   .postcard {
@@ -160,13 +268,19 @@
   footer { text-align: center; color: var(--muted); padding: 60px 16px 40px; font-size: .95rem; }
   footer .ai { display: inline-block; margin-top: 8px; background: var(--paper); border-radius: 999px; padding: 8px 16px; box-shadow: var(--shadow); }
 
+  #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+
   @media (max-width: 720px) {
     .diary::before { left: 22px; }
-    .entry, .entry:nth-child(odd), .entry:nth-child(even) { width: auto; margin-left: 52px; justify-self: stretch; rotate: 0deg; }
-    .entry:nth-child(odd)::after, .entry:nth-child(even)::after { left: -53px; right: auto; width: 40px; height: 40px; font-size: 1.4rem; }
+    .diary .entry, .diary .entry:nth-child(odd), .diary .entry:nth-child(even) { width: auto; margin-left: 52px; justify-self: stretch; rotate: 0deg; }
+    .diary .entry:nth-child(odd)::after, .diary .entry:nth-child(even)::after { left: -53px; right: auto; width: 40px; height: 40px; font-size: 1.4rem; }
+    .care { grid-template-columns: 1fr; }
+    .care-actions { justify-content: center; }
+    .global { text-align: center; }
     .postcard { grid-template-columns: 1fr; rotate: 0deg; }
     .postcard .msg { border-right: 0; border-bottom: 2px dashed #e4d3bf; padding: 0 0 18px; }
     .postcard .addr { padding: 18px 0 0; gap: 14px; }
+    .card { padding: 16px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .hero-mouse, .cloud { animation: none; }
@@ -181,52 +295,12 @@
   <div class="cloud" style="width:90px;height:30px;top:28%;animation-duration:62s;animation-delay:-35s"></div>
   <div class="cloud" style="width:150px;height:46px;top:6%;animation-duration:75s;animation-delay:-50s"></div>
   <div>
-    <svg class="hero-mouse" id="heroMouse" viewBox="0 0 200 200" aria-label="Eine kleine Maus mit Rucksack">
-      <!-- tail -->
-      <path d="M150 150 q40 10 30 -30 q-8 -25 10 -35" fill="none" stroke="#ff8fab" stroke-width="6" stroke-linecap="round"/>
-      <!-- backpack -->
-      <rect x="118" y="100" width="40" height="50" rx="12" fill="#ffc93c"/>
-      <rect x="124" y="112" width="28" height="12" rx="5" fill="#e9a800"/>
-      <!-- body -->
-      <ellipse cx="100" cy="135" rx="48" ry="44" fill="#c9bfbf"/>
-      <ellipse cx="100" cy="145" rx="28" ry="26" fill="#efe7e7"/>
-      <!-- ears -->
-      <circle cx="60" cy="55" r="30" fill="#c9bfbf"/>
-      <circle cx="60" cy="55" r="19" fill="#ffb3c6"/>
-      <circle cx="140" cy="55" r="30" fill="#c9bfbf"/>
-      <circle cx="140" cy="55" r="19" fill="#ffb3c6"/>
-      <!-- head -->
-      <ellipse cx="100" cy="88" rx="44" ry="40" fill="#d6cdcd"/>
-      <!-- hat -->
-      <path d="M68 58 q32 -34 64 0 z" fill="#ff8fab"/>
-      <rect x="62" y="54" width="76" height="9" rx="4" fill="#e06c8b"/>
-      <!-- eyes -->
-      <g id="eyes">
-        <ellipse cx="84" cy="86" rx="6" ry="8" fill="#3b2f2f"/>
-        <ellipse cx="116" cy="86" rx="6" ry="8" fill="#3b2f2f"/>
-        <circle cx="86" cy="83" r="2.2" fill="#fff"/>
-        <circle cx="118" cy="83" r="2.2" fill="#fff"/>
-      </g>
-      <!-- cheeks -->
-      <ellipse cx="72" cy="102" rx="8" ry="5" fill="#ffb3c6" opacity=".8"/>
-      <ellipse cx="128" cy="102" rx="8" ry="5" fill="#ffb3c6" opacity=".8"/>
-      <!-- nose + smile -->
-      <circle cx="100" cy="100" r="5" fill="#ff8fab"/>
-      <path d="M92 108 q8 8 16 0" fill="none" stroke="#3b2f2f" stroke-width="3" stroke-linecap="round"/>
-      <!-- whiskers -->
-      <g stroke="#8a7a72" stroke-width="2" stroke-linecap="round">
-        <line x1="78" y1="100" x2="52" y2="96"/><line x1="78" y1="104" x2="52" y2="108"/>
-        <line x1="122" y1="100" x2="148" y2="96"/><line x1="122" y1="104" x2="148" y2="108"/>
-      </g>
-      <!-- feet -->
-      <ellipse cx="80" cy="178" rx="14" ry="7" fill="#ffb3c6"/>
-      <ellipse cx="120" cy="178" rx="14" ry="7" fill="#ffb3c6"/>
-    </svg>
+    <div class="hero-mouse" id="heroMouse" role="img" aria-label="Eine kleine Maus mit Rucksack"></div>
     <h1>Die <span>kleine Maus</span><br>geht auf Reisen</h1>
     <p class="tagline">Sie ist 9 cm groß, hat einen Rucksack voller Käse und absolut keinen Plan. Sie ist trotzdem (oder genau deswegen) die glücklichste Maus der Welt.</p>
     <div class="btn-row">
-      <a class="btn" href="#tagebuch">📖 Zum Reisetagebuch</a>
-      <a class="btn cheese" href="#spiel">🧀 Direkt zum Spiel</a>
+      <a class="btn" href="#tagebuch">📖 Reisetagebuch</a>
+      <a class="btn cheese" href="#spiel">🧀 Zum Spiel</a>
     </div>
   </div>
 </header>
@@ -237,6 +311,36 @@
     <div class="stat"><b id="cheese">0</b><small>Käsesorten probiert</small></div>
     <div class="stat"><b>∞</b><small>Glückslevel</small></div>
     <div class="stat"><b>0</b><small>Katzen, die sie erwischt haben</small></div>
+  </section>
+
+  <section id="maus">
+    <h2>🏡 Die Maus-Ecke</h2>
+    <p class="sub">Füttern, knuddeln, schick anziehen. Die Maus merkt sich alles.</p>
+    <div class="card care">
+      <div class="care-stage">
+        <div class="bubble" id="bubble">Piep!</div>
+        <div id="careMouse"></div>
+        <div class="meters">
+          <div class="meter">🧀 <div class="bar"><i id="hungerBar" style="background:linear-gradient(90deg,var(--cheese),#ffdd7a)"></i></div></div>
+          <div class="meter">💕 <div class="bar"><i id="loveBar" style="background:linear-gradient(90deg,var(--pink),#ffc2d1)"></i></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="care-actions">
+          <button class="btn cheese" id="feedBtn">🧀 Füttern</button>
+          <button class="btn" id="cuddleBtn">🤗 Knuddeln</button>
+        </div>
+        <p class="global" id="globalStats">&nbsp;</p>
+        <div class="wardrobe">
+          <h3>🎩 Kopf</h3>
+          <div class="chips" id="hatChips"></div>
+          <h3>✨ Extra</h3>
+          <div class="chips" id="extraChips"></div>
+          <h3>🎨 Fell</h3>
+          <div class="chips" id="furChips"></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section id="tagebuch">
@@ -310,17 +414,57 @@
     </div>
   </section>
 
+  <section id="wunsch">
+    <h2>🗺️ Wohin als Nächstes?</h2>
+    <p class="sub">Schick die Maus irgendwohin. Eine KI schreibt live den Tagebucheintrag dazu.</p>
+    <div class="card">
+      <form class="wish-form" id="wishForm">
+        <input id="wishInput" maxlength="40" placeholder="z. B. Nordpol, Omas Garten, Mars …" autocomplete="off" aria-label="Reiseziel">
+        <button class="btn" id="wishBtn">✈️ Los, kleine Maus!</button>
+      </form>
+      <div class="chips wish-chips" id="wishChips"></div>
+      <div class="loading" id="loading"><span class="packer">🎒</span><p id="loadingText">Die Maus packt ihren Rucksack …</p></div>
+      <p class="wish-error" id="wishError"></p>
+      <p class="ai-note">✨ Die Einträge entstehen in Echtzeit mit einem KI-Sprachmodell und sind für alle Besucher sichtbar.</p>
+    </div>
+    <div class="trips" id="trips"></div>
+  </section>
+
   <section id="spiel">
     <h2>🧀 Minispiel: Käse-Regen!</h2>
-    <p class="sub">Hilf der kleinen Maus, Käse für die nächste Reise zu sammeln. Aber Achtung vor den Katzen!</p>
-    <div class="game-card">
+    <p class="sub">Sammle Leckereien für die Weltreise. Alle paar Punkte reist die Maus weiter, bis zum Mond!</p>
+    <div class="card game-card">
       <div class="hud">
         <span>🧀 <span id="score">0</span></span>
         <span class="hearts" id="hearts">❤️❤️❤️</span>
         <span>🏆 <span id="best">0</span></span>
+        <button class="icon-btn" id="muteBtn" aria-label="Ton an/aus">🔊</button>
       </div>
-      <canvas id="game" width="480" height="640" aria-label="Käse-Regen Spielfeld"></canvas>
-      <p class="game-help">Maus bewegen: Finger/Maus ziehen oder ← → Pfeiltasten. 🧀 = +1 · 🍰 = +5 · 🐱 = autsch</p>
+      <div class="stage">
+        <canvas id="game" width="480" height="640" aria-label="Käse-Regen Spielfeld"></canvas>
+        <div class="overlay" id="overlay" hidden>
+          <div>
+            <h3 id="ovTitle">Spiel vorbei!</h3>
+            <p id="ovLine"></p>
+            <p class="big" id="ovScore"></p>
+            <p id="ovRecord"></p>
+            <form id="scoreForm">
+              <input id="nameInput" maxlength="16" placeholder="Dein Name" autocomplete="nickname" aria-label="Dein Name">
+              <button class="btn small">🏆 Eintragen</button>
+            </form>
+            <p class="ov-msg" id="ovMsg"></p>
+            <button class="btn small cheese" id="againBtn">🔄 Nochmal</button>
+          </div>
+        </div>
+      </div>
+      <p class="game-help">
+        Maus bewegen: Finger/Maus ziehen oder ← → Pfeiltasten<br>
+        🧀 = +1 · 🍰 = +5 · 🛡️ Schutzschild · 🧲 Käse-Magnet · 💖 Extra-Leben · 🐱 = autsch
+      </p>
+      <div class="board">
+        <h3>🏆 Bestenliste</h3>
+        <ol id="board"><li class="empty">Wird geladen …</li></ol>
+      </div>
     </div>
   </section>
 
@@ -348,35 +492,285 @@
 
 <footer>
   Keine Mäuse wurden für diese Webseite verletzt. Eine hat aber sehr viel Käse gegessen.<br>
-  <span class="ai">✨ Diese Seite (Texte, Bilder, Spiel &amp; Code) hat eine KI in ein paar Minuten gebaut ✨</span>
+  <span class="ai">✨ Diese Seite (Texte, Bilder, Spiel &amp; Code) hat eine KI gebaut ✨</span><br><br>
+  <a href="https://github.com/swenz/kleinemaus">Code auf GitHub</a>
 </footer>
 
+<canvas id="confetti" hidden></canvas>
+
 <script>
-// --- squeaks when you click the hero mouse ---
-const squeaks = ["Piep!", "Quiek!", "Käse?", "Hihi!", "Piep piep!", "♥"];
-document.getElementById("heroMouse").addEventListener("click", e => {
+const API = "https://kleinemaus-api.wenz.io";
+
+const store = {
+  get(key, fallback) { try { const v = localStorage.getItem("kleinemaus-" + key); return v == null ? fallback : JSON.parse(v); } catch (e) { return fallback; } },
+  set(key, val) { try { localStorage.setItem("kleinemaus-" + key, JSON.stringify(val)); } catch (e) {} },
+};
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+
+// ---------- Sound (synthesized, no files) ----------
+const sound = (() => {
+  let ac = null, muted = store.get("muted", false);
+  function ctx() {
+    if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    if (ac && ac.state === "suspended") ac.resume();
+    return ac;
+  }
+  function tone(freq, dur, { type = "sine", vol = .12, to = null, delay = 0 } = {}) {
+    if (muted) return;
+    const a = ctx(); if (!a) return;
+    const t = a.currentTime + delay;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + .02);
+  }
+  const seq = (notes, step, opts) => notes.forEach((f, i) => tone(f, step * 1.6, { ...opts, delay: i * step }));
+  return {
+    get muted() { return muted; },
+    toggle() { muted = !muted; store.set("muted", muted); if (!muted) ctx(); return muted; },
+    squeak() { tone(1500, .07, { type: "triangle", to: 2100 }); tone(1700, .08, { type: "triangle", to: 2300, delay: .09 }); },
+    catch() { tone(700, .09, { type: "triangle", to: 1100 }); },
+    cake() { seq([523, 659, 784, 1047], .06, { type: "triangle" }); },
+    hurt() { tone(320, .3, { type: "sawtooth", vol: .08, to: 110 }); },
+    power() { seq([440, 660, 880, 1320], .05, { type: "square", vol: .05 }); },
+    level() { seq([523, 659, 784, 659, 784, 1047], .09, { type: "triangle" }); },
+    over() { seq([523, 415, 330, 262], .14, { type: "triangle" }); },
+    munch() { tone(220, .06, { type: "square", vol: .05 }); tone(260, .06, { type: "square", vol: .05, delay: .1 }); tone(200, .06, { type: "square", vol: .05, delay: .2 }); },
+    love() { seq([784, 988, 1175], .08, { type: "sine", vol: .1 }); },
+  };
+})();
+
+// ---------- Confetti ----------
+function confetti(amount = 160) {
+  const cv = document.getElementById("confetti");
+  const ctx = cv.getContext("2d");
+  cv.hidden = false;
+  cv.width = innerWidth; cv.height = innerHeight;
+  const colors = ["#ff8fab", "#ffc93c", "#bde0fe", "#c7f0d8", "#ffb3c6", "#a78bfa"];
+  const bits = Array.from({ length: amount }, () => ({
+    x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight * .35,
+    vx: (Math.random() - .5) * 16, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 10 + Math.random() * 8, r: Math.random() * 6, vr: (Math.random() - .5) * .3,
+    c: rand(colors), e: Math.random() < .12 ? rand(["🧀", "🐭", "💖"]) : null,
+  }));
+  const end = performance.now() + 3800;
+  (function frame(t) {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    for (const b of bits) {
+      b.x += b.vx; b.y += b.vy; b.vy += .35; b.vx *= .99; b.r += b.vr;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.r);
+      if (b.e) { ctx.font = "22px serif"; ctx.fillText(b.e, 0, 0); }
+      else { ctx.fillStyle = b.c; ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); }
+      ctx.restore();
+    }
+    if (t < end) requestAnimationFrame(frame); else { cv.hidden = true; }
+  })(performance.now());
+}
+
+// ---------- Mouse look (shared) ----------
+const HATS = [
+  { id: "travel", label: "🎒 Reisehut" }, { id: "👑", label: "👑 Krone" }, { id: "🎩", label: "🎩 Zylinder" },
+  { id: "🧢", label: "🧢 Cap" }, { id: "👒", label: "👒 Sonnenhut" }, { id: "🎓", label: "🎓 Doktorhut" }, { id: "", label: "🙅 Nix" },
+];
+const EXTRAS = [
+  { id: "", label: "🙅 Nix" }, { id: "🕶️", label: "🕶️ Brille" }, { id: "🌸", label: "🌸 Blume" },
+  { id: "🎀", label: "🎀 Schleife" }, { id: "🧣", label: "🧣 Schal" },
+];
+const FURS = {
+  grau:  { label: "Grau",  fur: "#c9bfbf", head: "#d6cdcd", belly: "#efe7e7" },
+  braun: { label: "Braun", fur: "#b08968", head: "#c19a77", belly: "#ecdcc8" },
+  weiss: { label: "Weiß",  fur: "#e7e2dd", head: "#f3efeb", belly: "#ffffff" },
+  rosa:  { label: "Rosa",  fur: "#f2b1bf", head: "#f7c4cf", belly: "#fde8ee" },
+  gold:  { label: "Gold",  fur: "#e9c46a", head: "#f1d38a", belly: "#fff3cf" },
+};
+const EXTRA_POS = {
+  "🕶️": { x: 100, y: 103, s: 46 }, "🌸": { x: 150, y: 48, s: 30 }, "🎀": { x: 52, y: 46, s: 32 }, "🧣": { x: 100, y: 150, s: 56 },
+};
+let look = { hat: "travel", extra: "", fur: "grau", ...store.get("look", {}) };
+
+function mouseSVG() {
+  return `<svg class="mouse-svg" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M150 150 q40 10 30 -30 q-8 -25 10 -35" fill="none" stroke="#ff8fab" stroke-width="6" stroke-linecap="round"/>
+    <rect x="118" y="100" width="40" height="50" rx="12" fill="#ffc93c"/>
+    <rect x="124" y="112" width="28" height="12" rx="5" fill="#e9a800"/>
+    <ellipse class="fur" cx="100" cy="135" rx="48" ry="44"/>
+    <ellipse class="belly" cx="100" cy="145" rx="28" ry="26"/>
+    <circle class="fur" cx="60" cy="55" r="30"/><circle cx="60" cy="55" r="19" fill="#ffb3c6"/>
+    <circle class="fur" cx="140" cy="55" r="30"/><circle cx="140" cy="55" r="19" fill="#ffb3c6"/>
+    <ellipse class="head" cx="100" cy="88" rx="44" ry="40"/>
+    <g class="hat-travel"><path d="M68 58 q32 -34 64 0 z" fill="#ff8fab"/><rect x="62" y="54" width="76" height="9" rx="4" fill="#e06c8b"/></g>
+    <text class="hat-emoji" x="100" y="62" font-size="54" text-anchor="middle"></text>
+    <g class="eyes"><g class="pupils">
+      <ellipse cx="84" cy="86" rx="6" ry="8" fill="#3b2f2f"/><ellipse cx="116" cy="86" rx="6" ry="8" fill="#3b2f2f"/>
+      <circle cx="86" cy="83" r="2.2" fill="#fff"/><circle cx="118" cy="83" r="2.2" fill="#fff"/>
+    </g></g>
+    <ellipse class="cheek" cx="72" cy="102" rx="8" ry="5" fill="#ffb3c6" opacity=".8"/>
+    <ellipse class="cheek" cx="128" cy="102" rx="8" ry="5" fill="#ffb3c6" opacity=".8"/>
+    <circle cx="100" cy="100" r="5" fill="#ff8fab"/>
+    <path d="M92 108 q8 8 16 0" fill="none" stroke="#3b2f2f" stroke-width="3" stroke-linecap="round"/>
+    <g stroke="#8a7a72" stroke-width="2" stroke-linecap="round">
+      <line x1="78" y1="100" x2="52" y2="96"/><line x1="78" y1="104" x2="52" y2="108"/>
+      <line x1="122" y1="100" x2="148" y2="96"/><line x1="122" y1="104" x2="148" y2="108"/>
+    </g>
+    <ellipse cx="80" cy="178" rx="14" ry="7" fill="#ffb3c6"/><ellipse cx="120" cy="178" rx="14" ry="7" fill="#ffb3c6"/>
+    <text class="extra-emoji" text-anchor="middle"></text>
+  </svg>`;
+}
+
+const mice = [];
+for (const id of ["heroMouse", "careMouse"]) {
+  const host = document.getElementById(id);
+  host.innerHTML = mouseSVG();
+  mice.push(host.querySelector("svg"));
+}
+
+function applyLook() {
+  const f = FURS[look.fur] || FURS.grau;
+  for (const svg of mice) {
+    svg.style.setProperty("--fur", f.fur); svg.style.setProperty("--head", f.head); svg.style.setProperty("--belly", f.belly);
+    svg.querySelector(".hat-travel").style.display = look.hat === "travel" ? "" : "none";
+    svg.querySelector(".hat-emoji").textContent = look.hat === "travel" ? "" : look.hat;
+    const ex = svg.querySelector(".extra-emoji"), pos = EXTRA_POS[look.extra];
+    ex.textContent = look.extra;
+    if (pos) { ex.setAttribute("x", pos.x); ex.setAttribute("y", pos.y); ex.setAttribute("font-size", pos.s); }
+  }
+  store.set("look", look);
+}
+
+function makeChips(hostId, items, key) {
+  const host = document.getElementById(hostId);
+  host.innerHTML = "";
+  for (const it of items) {
+    const b = document.createElement("button");
+    b.className = "chip"; b.type = "button";
+    if (it.swatch) b.innerHTML = `<span class="swatch" style="background:${it.swatch}"></span>`;
+    b.append(it.label);
+    b.setAttribute("aria-pressed", String(look[key] === it.id));
+    b.addEventListener("click", () => {
+      look[key] = it.id; applyLook();
+      host.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c === b)));
+      wiggle(); say(rand(["Schick! ✨", "Wie seh ich aus?", "Ich bin so fancy!", "Piep! 😎", "Neuer Look!"]));
+      sound.squeak();
+    });
+    host.appendChild(b);
+  }
+}
+makeChips("hatChips", HATS, "hat");
+makeChips("extraChips", EXTRAS, "extra");
+makeChips("furChips", Object.entries(FURS).map(([id, f]) => ({ id, label: f.label, swatch: f.fur })), "fur");
+applyLook();
+
+// Blinking + eyes follow the pointer.
+setInterval(() => {
+  mice.forEach(m => m.classList.add("blink"));
+  setTimeout(() => mice.forEach(m => m.classList.remove("blink")), 140);
+}, 3400);
+addEventListener("pointermove", e => {
+  for (const svg of mice) {
+    const r = svg.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height * .43;
+    const dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy) || 1;
+    const k = Math.min(4, d / 40);
+    svg.querySelector(".pupils").setAttribute("transform", `translate(${(dx / d * k).toFixed(1)} ${(dy / d * k).toFixed(1)})`);
+  }
+}, { passive: true });
+
+// Squeaks when you tap the hero mouse.
+const squeaks = ["Piep!", "Quiek!", "Käse?", "Hihi!", "Piep piep!", "♥", "Kitzelig!"];
+function floatText(x, y, text) {
   const s = document.createElement("div");
-  s.className = "squeak";
-  s.textContent = squeaks[Math.floor(Math.random() * squeaks.length)];
-  s.style.left = e.pageX + "px";
-  s.style.top = e.pageY - 20 + "px";
+  s.className = "squeak"; s.textContent = text;
+  s.style.left = x + "px"; s.style.top = y - 20 + "px";
   document.body.appendChild(s);
   setTimeout(() => s.remove(), 1000);
+}
+document.getElementById("heroMouse").addEventListener("click", e => { floatText(e.pageX, e.pageY, rand(squeaks)); sound.squeak(); });
+
+// ---------- Maus-Ecke: feed, cuddle, meters ----------
+const careSvg = mice[1];
+const bubble = document.getElementById("bubble");
+let bubbleT;
+function say(text) {
+  bubble.textContent = text; bubble.classList.add("show");
+  clearTimeout(bubbleT); bubbleT = setTimeout(() => bubble.classList.remove("show"), 1800);
+}
+function wiggle() { careSvg.classList.remove("wiggle"); void careSvg.offsetWidth; careSvg.classList.add("wiggle"); }
+
+// Meters decay slowly while you're away (1 point per 3 minutes).
+let pet = { hunger: 70, love: 70, t: Date.now(), ...store.get("pet", {}) };
+{
+  const lost = Math.floor((Date.now() - pet.t) / 180000);
+  pet.hunger = Math.max(0, pet.hunger - lost); pet.love = Math.max(0, pet.love - lost); pet.t = Date.now();
+}
+function renderPet() {
+  document.getElementById("hungerBar").style.width = pet.hunger + "%";
+  document.getElementById("loveBar").style.width = pet.love + "%";
+  pet.t = Date.now(); store.set("pet", pet);
+}
+renderPet();
+setTimeout(() => {
+  if (pet.hunger < 30) say("Ich hab sooo Hunger … 🥺");
+  else if (pet.love < 30) say("Knuddelst du mich? 🥺");
+}, 1500);
+
+const globalEl = document.getElementById("globalStats");
+let globalStats = null, pending = { feed: 0, cuddle: 0 };
+function renderGlobal() {
+  if (!globalStats) return;
+  const fed = globalStats.fed + pending.feed, cud = globalStats.cuddled + pending.cuddle;
+  globalEl.textContent = `Von allen Besuchern schon ${fed.toLocaleString("de-DE")}× gefüttert und ${cud.toLocaleString("de-DE")}× geknuddelt.`;
+}
+fetch(API + "/stats").then(r => r.json()).then(s => { globalStats = s; renderGlobal(); }).catch(() => {});
+setInterval(() => {
+  for (const kind of ["feed", "cuddle"]) {
+    const n = pending[kind];
+    if (!n) continue;
+    pending[kind] = 0;
+    fetch(API + "/stats", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, n }) })
+      .then(r => r.json()).then(s => { globalStats = s; renderGlobal(); })
+      .catch(() => { if (globalStats) globalStats[kind === "feed" ? "fed" : "cuddled"] += n; });
+  }
+}, 2000);
+
+const SNACKS = ["🧀", "🧀", "🧀", "🍰", "🥐", "🍕", "🫐", "🍓"];
+document.getElementById("feedBtn").addEventListener("click", e => {
+  const snack = rand(SNACKS);
+  const el = document.createElement("div");
+  el.className = "flying"; el.textContent = snack;
+  const from = e.currentTarget.getBoundingClientRect(), to = careSvg.getBoundingClientRect();
+  el.style.left = from.left + from.width / 2 - 16 + "px"; el.style.top = from.top - 10 + "px";
+  document.body.appendChild(el);
+  requestAnimationFrame(() => {
+    el.style.transform = `translate(${to.left + to.width / 2 - from.left - from.width / 2}px, ${to.top + to.height * .52 - from.top + 10}px) scale(.5)`;
+    el.style.opacity = "0";
+  });
+  setTimeout(() => {
+    el.remove();
+    careSvg.classList.remove("chomp"); void careSvg.offsetWidth; careSvg.classList.add("chomp");
+    sound.munch();
+    pet.hunger = Math.min(100, pet.hunger + 12); renderPet();
+    say(pet.hunger >= 100 ? rand(["Ich platze gleich! 🫃", "Kein Platz mehr! 😵", "Nur noch ein ganz kleines … nein."]) : rand(["Mmmh! 😋", "Lecker!", "Mehr! 🧀", "Nom nom nom", "Bester Käse ever!"]));
+    pending.feed++; renderGlobal();
+  }, 560);
+});
+document.getElementById("cuddleBtn").addEventListener("click", () => {
+  const r = careSvg.getBoundingClientRect();
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => floatText(r.left + scrollX + r.width * (.25 + Math.random() * .5), r.top + scrollY + r.height * .35, rand(["💕", "💖", "♥", "💗"])), i * 90);
+  }
+  careSvg.classList.add("blush"); setTimeout(() => careSvg.classList.remove("blush"), 1200);
+  wiggle(); sound.love();
+  pet.love = Math.min(100, pet.love + 10); renderPet();
+  say(rand(["Hihi! 🥰", "Ich hab dich lieb!", "Nochmal! 💕", "Kuschelig!", "Piep ♥"]));
+  pending.cuddle++; renderGlobal();
 });
 
-// --- blink ---
-const eyes = document.getElementById("eyes");
-setInterval(() => {
-  eyes.style.transform = "scaleY(.1)";
-  eyes.style.transformOrigin = "100px 86px";
-  setTimeout(() => (eyes.style.transform = ""), 140);
-}, 3200);
-
-// --- reveal diary entries + count stats ---
+// ---------- Diary reveal + stats ----------
 const io = new IntersectionObserver(entries => {
   entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add("show"); io.unobserve(en.target); } });
 }, { threshold: .15 });
-document.querySelectorAll(".entry").forEach(el => io.observe(el));
+document.querySelectorAll(".diary .entry").forEach(el => io.observe(el));
 
 function countUp(el, to, ms) {
   const start = performance.now();
@@ -389,7 +783,98 @@ function countUp(el, to, ms) {
 countUp(document.getElementById("km"), 384712, 2200);
 countUp(document.getElementById("cheese"), 47, 2200);
 
-// --- Minigame: Käse-Regen ---
+// ---------- Reisewunsch (KI) ----------
+(() => {
+  const form = document.getElementById("wishForm");
+  const input = document.getElementById("wishInput");
+  const btn = document.getElementById("wishBtn");
+  const loading = document.getElementById("loading");
+  const loadingText = document.getElementById("loadingText");
+  const err = document.getElementById("wishError");
+  const list = document.getElementById("trips");
+  const IDEAS = ["🎄 Nordpol", "🏜️ Ägypten", "🎰 Las Vegas", "🐋 Im Bauch eines Wals", "🛒 Supermarkt", "🌋 Vulkan", "🏰 Neuschwanstein", "🪐 Saturn", "🧦 Unter die Waschmaschine", "🎡 Oktoberfest"];
+  const PACKING = ["Die Maus packt ihren Rucksack …", "Sucht ihren Reisepass (er ist 2 mm groß) …", "Verabschiedet sich vom Brotkrümel …", "Steigt in den Flieger (Handgepäckfach) …", "Kommt an und staunt …", "Schreibt fleißig Tagebuch …"];
+  const PIC_BG = ["#ffe5ec", "#e6f0ff", "#fff1d6", "#d6f3ff", "#c7f0d8", "#ffe9f1", "#f3e8ff"];
+
+  const chips = document.getElementById("wishChips");
+  for (const idea of [...IDEAS].sort(() => Math.random() - .5).slice(0, 5)) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = idea;
+    b.addEventListener("click", () => { input.value = idea.replace(/^\S+\s/, ""); form.requestSubmit(); });
+    chips.appendChild(b);
+  }
+
+  function ago(ts) {
+    const m = Math.round((Date.now() - ts) / 60000);
+    if (m < 1) return "gerade eben";
+    if (m < 60) return `vor ${m} Min.`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `vor ${h} Std.`;
+    const d = Math.round(h / 24);
+    return d === 1 ? "gestern" : `vor ${d} Tagen`;
+  }
+
+  function card(t, isNew) {
+    const a = document.createElement("article");
+    a.className = "entry" + (isNew ? " new" : "");
+    const pic = document.createElement("div");
+    pic.className = "pic"; pic.style.background = PIC_BG[parseInt(t.id, 16) % PIC_BG.length] || PIC_BG[0];
+    pic.textContent = t.emoji;
+    const day = document.createElement("div"); day.className = "day"; day.textContent = `${t.place} · ${ago(t.at)}`;
+    const wished = document.createElement("div"); wished.className = "wished"; wished.textContent = `Wunschziel: „${t.wish}“`;
+    const h = document.createElement("h3"); h.textContent = t.title;
+    const p = document.createElement("p");
+    const mood = document.createElement("div"); mood.className = "mood";
+    mood.innerHTML = `Laune <div class="mood-bar"><i style="width:${t.mood}%"></i></div> ${t.mood >= 95 ? "🤩" : t.mood >= 85 ? "😊" : "🙂"}`;
+    a.append(pic, day, wished, h, p, mood);
+    if (isNew) {
+      // Typewriter effect so you can watch the AI's text appear.
+      p.classList.add("caret");
+      let i = 0;
+      const tick = () => { p.textContent = t.text.slice(0, ++i); if (i < t.text.length) setTimeout(tick, 18); else p.classList.remove("caret"); };
+      tick();
+    } else {
+      p.textContent = t.text;
+    }
+    return a;
+  }
+
+  function renderEmpty() {
+    if (!list.children.length) list.innerHTML = '<p class="trips-empty">Noch keine Wunschreisen. Sei die erste Person, die die Maus irgendwohin schickt! 🐭</p>';
+  }
+
+  fetch(API + "/trips").then(r => r.json()).then(trips => {
+    list.innerHTML = "";
+    trips.forEach(t => list.appendChild(card(t, false)));
+    renderEmpty();
+  }).catch(renderEmpty);
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const destination = input.value.trim();
+    if (destination.length < 2) { input.focus(); return; }
+    err.textContent = ""; btn.disabled = true; loading.classList.add("on");
+    let k = 0; loadingText.textContent = PACKING[0];
+    const iv = setInterval(() => { loadingText.textContent = PACKING[++k % PACKING.length]; }, 1300);
+    try {
+      const res = await fetch(API + "/trips", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ destination }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Hoppla!");
+      list.querySelector(".trips-empty")?.remove();
+      const el = card(data, true);
+      list.prepend(el);
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      input.value = "";
+      sound.level();
+    } catch (ex) {
+      err.textContent = ex.message || "Die Maus hat sich verlaufen. Nochmal versuchen? 🧭";
+    } finally {
+      clearInterval(iv); btn.disabled = false; loading.classList.remove("on");
+    }
+  });
+})();
+
+// ---------- Minigame: Käse-Regen ----------
 (() => {
   const cv = document.getElementById("game");
   const ctx = cv.getContext("2d");
@@ -397,81 +882,176 @@ countUp(document.getElementById("cheese"), 47, 2200);
   const scoreEl = document.getElementById("score");
   const heartsEl = document.getElementById("hearts");
   const bestEl = document.getElementById("best");
-  let best = 0;
-  try { best = +localStorage.getItem("kleinemaus-best") || 0; } catch (e) {}
-  bestEl.textContent = best;
+  const overlay = document.getElementById("overlay");
+  const boardEl = document.getElementById("board");
+  const nameInput = document.getElementById("nameInput");
+  const scoreForm = document.getElementById("scoreForm");
+  const ovMsg = document.getElementById("ovMsg");
+  const muteBtn = document.getElementById("muteBtn");
 
-  const mouse = { x: W / 2, y: H - 60, w: 70, targetX: W / 2, squish: 0 };
-  let items = [], parts = [], score, lives, state = "start", spawnT, speed, time, flash = 0, keys = {};
+  let best = +store.get("best", 0) || 0;
+  bestEl.textContent = best;
+  nameInput.value = store.get("name", "");
+  muteBtn.textContent = sound.muted ? "🔇" : "🔊";
+  muteBtn.addEventListener("click", () => { muteBtn.textContent = sound.toggle() ? "🔇" : "🔊"; });
+
+  const LEVELS = [
+    { name: "Zuhause",         at: 0,   sky: ["#cdeafe", "#fff3d6"], ground: ["#b8e6a8", "#9bd68a"], deco: "🏡", goodie: "🧀", enemy: "🐱" },
+    { name: "Paris",           at: 15,  sky: ["#ffd6e0", "#fff1e6"], ground: ["#c9e4a6", "#b0d68a"], deco: "🗼", goodie: "🥐", enemy: "🐱" },
+    { name: "Schweizer Alpen", at: 35,  sky: ["#dbeafe", "#ffffff"], ground: ["#f1f5f9", "#dbe4ee"], deco: "🏔️", goodie: "🧀", enemy: "🐱" },
+    { name: "Napoli",          at: 60,  sky: ["#ffe5b4", "#fff7e0"], ground: ["#e9c46a", "#d4a94a"], deco: "🛵", goodie: "🍕", enemy: "🐱" },
+    { name: "Am Meer",         at: 90,  sky: ["#a5e1ff", "#e0f7ff"], ground: ["#f6dfa4", "#ecc97a"], deco: "🏝️", goodie: "🍦", enemy: "🐱" },
+    { name: "Tokio",           at: 130, sky: ["#ffd1e8", "#fff0f7"], ground: ["#c7f0d8", "#a8e2bf"], deco: "🗻", goodie: "🍣", enemy: "🐱" },
+    { name: "Der Mond",        at: 180, sky: ["#1e1b4b", "#433f8a"], ground: ["#cbd5e1", "#94a3b8"], deco: "🌍", goodie: "⭐", enemy: "☄️", night: true },
+  ];
+  const STARS = Array.from({ length: 50 }, () => ({ x: Math.random() * W, y: Math.random() * H * .8, r: Math.random() * 1.6 + .4 }));
+  const POWERS = { shield: "🛡️", magnet: "🧲", life: "💖" };
+
+  const mouse = { x: W / 2, y: H - 60, targetX: W / 2, squish: 0 };
+  let items, parts, score, lives, state = "start", spawnT, time, flash = 0, keys = {};
+  let level, banner, shieldT, magnetT, combo;
 
   function reset() {
-    items = []; parts = []; score = 0; lives = 3; spawnT = 0; speed = 1; time = 0;
+    items = []; parts = []; score = 0; lives = 3; spawnT = 0; time = 0; flash = 0;
+    level = 0; banner = null; shieldT = 0; magnetT = 0; combo = 0;
     mouse.x = mouse.targetX = W / 2;
     updateHud();
   }
   function updateHud() {
     scoreEl.textContent = score;
-    heartsEl.textContent = "❤️".repeat(lives) + "🤍".repeat(Math.max(0, 3 - lives));
+    heartsEl.textContent = "❤️".repeat(Math.max(0, lives)) + "🤍".repeat(Math.max(0, 3 - lives));
   }
 
   function spawn() {
+    const L = LEVELS[level];
     const r = Math.random();
-    const catChance = Math.min(.38, .15 + time / 3000);
-    const kind = r < catChance ? "cat" : r < catChance + .07 ? "cake" : "cheese";
+    const catChance = Math.min(.36, .14 + time / 3500 + level * .015);
+    let kind, emoji;
+    if (r < catChance) { kind = "enemy"; emoji = L.enemy; }
+    else if (r < catChance + .035) {
+      kind = "power";
+      const opts = ["shield", "magnet"];
+      if (lives < 5) opts.push("life");
+      emoji = POWERS[kind = rand(opts)];
+    }
+    else if (r < catChance + .1) { kind = "cake"; emoji = "🍰"; }
+    else { kind = "good"; emoji = Math.random() < .5 ? "🧀" : L.goodie; }
+    const isEnemy = kind === "enemy";
     items.push({
-      kind, x: 30 + Math.random() * (W - 60), y: -30,
-      vy: (2 + Math.random() * 1.6) * speed, rot: Math.random() * 6, vr: (Math.random() - .5) * .1
+      kind, emoji, x: 30 + Math.random() * (W - 60), y: -30,
+      vy: (2 + Math.random() * 1.6) * (1 + time / 2400 + level * .06) * (isEnemy && Math.random() < .25 ? 1.35 : 1),
+      wob: isEnemy ? (Math.random() - .5) * 2.2 : 0,
+      rot: Math.random() * 6, vr: (Math.random() - .5) * .1,
     });
   }
 
-  function burst(x, y, emoji) {
-    for (let i = 0; i < 8; i++) parts.push({ x, y, vx: (Math.random() - .5) * 6, vy: -Math.random() * 5 - 1, life: 40, emoji });
+  function burst(x, y, emoji, n = 8) {
+    for (let i = 0; i < n; i++) parts.push({ x, y, vx: (Math.random() - .5) * 6, vy: -Math.random() * 5 - 1, life: 40, txt: emoji, size: 18 });
   }
+  function popText(x, y, txt, color = "#e06c8b") { parts.push({ x, y, vx: 0, vy: -1.6, life: 45, txt, size: 22, color, g: 0 }); }
 
   function drawMouse() {
     const { x, y } = mouse;
     const sq = mouse.squish;
+    const f = FURS[look.fur] || FURS.grau;
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(1 + sq * .15, 1 - sq * .15);
-    // tail
     ctx.strokeStyle = "#ff8fab"; ctx.lineWidth = 4; ctx.lineCap = "round";
     ctx.beginPath(); ctx.moveTo(28, 12); ctx.quadraticCurveTo(55, 10, 50, -12); ctx.stroke();
-    // body
-    ctx.fillStyle = "#c9bfbf"; ctx.beginPath(); ctx.ellipse(0, 6, 32, 24, 0, 0, Math.PI * 2); ctx.fill();
-    // ears
+    ctx.fillStyle = f.fur; ctx.beginPath(); ctx.ellipse(0, 6, 32, 24, 0, 0, Math.PI * 2); ctx.fill();
     for (const ex of [-20, 20]) {
-      ctx.fillStyle = "#c9bfbf"; ctx.beginPath(); ctx.arc(ex, -26, 15, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = f.fur; ctx.beginPath(); ctx.arc(ex, -26, 15, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "#ffb3c6"; ctx.beginPath(); ctx.arc(ex, -26, 9, 0, Math.PI * 2); ctx.fill();
     }
-    // head
-    ctx.fillStyle = "#d6cdcd"; ctx.beginPath(); ctx.ellipse(0, -10, 24, 21, 0, 0, Math.PI * 2); ctx.fill();
-    // eyes
+    ctx.fillStyle = f.head; ctx.beginPath(); ctx.ellipse(0, -10, 24, 21, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#3b2f2f";
-    const hurt = flash > 0;
-    if (hurt) {
-      ctx.font = "bold 12px Fredoka"; ctx.textAlign = "center"; ctx.fillText("× ×", 0, -10);
+    if (flash > 0) {
+      ctx.font = "bold 12px Fredoka"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillText("× ×", 0, -10);
     } else {
       ctx.beginPath(); ctx.ellipse(-8, -12, 3.5, 4.5, 0, 0, Math.PI * 2); ctx.ellipse(8, -12, 3.5, 4.5, 0, 0, Math.PI * 2); ctx.fill();
     }
-    // nose
     ctx.fillStyle = "#ff8fab"; ctx.beginPath(); ctx.arc(0, -2, 3.5, 0, Math.PI * 2); ctx.fill();
-    // cheeks
     ctx.globalAlpha = .7; ctx.fillStyle = "#ffb3c6";
     ctx.beginPath(); ctx.ellipse(-15, -3, 5, 3, 0, 0, Math.PI * 2); ctx.ellipse(15, -3, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if (look.hat === "travel") {
+      ctx.fillStyle = "#ff8fab"; ctx.beginPath(); ctx.moveTo(-16, -27); ctx.quadraticCurveTo(0, -46, 16, -27); ctx.fill();
+      ctx.fillStyle = "#e06c8b"; ctx.fillRect(-19, -29, 38, 5);
+    } else if (look.hat) {
+      ctx.font = "28px serif"; ctx.fillText(look.hat, 0, -36);
+    }
+    const EX = { "🕶️": [0, -11, 22], "🌸": [22, -34, 16], "🎀": [-22, -34, 16], "🧣": [0, 10, 28] }[look.extra];
+    if (EX) { ctx.font = EX[2] + "px serif"; ctx.fillText(look.extra, EX[0], EX[1]); }
     ctx.restore();
+
+    if (shieldT > 0) {
+      ctx.save();
+      ctx.globalAlpha = shieldT < 90 && shieldT % 20 < 10 ? .25 : .5;
+      ctx.strokeStyle = "#60a5fa"; ctx.fillStyle = "rgba(147,197,253,.25)"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(x, y - 6, 52, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
   }
 
-  function drawGround() {
-    ctx.fillStyle = "#b8e6a8"; ctx.fillRect(0, H - 26, W, 26);
-    ctx.fillStyle = "#9bd68a";
+  function drawWorld() {
+    const L = LEVELS[level];
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, L.sky[0]); g.addColorStop(1, L.sky[1]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    if (L.night) {
+      ctx.fillStyle = "#fff";
+      for (const s of STARS) { ctx.globalAlpha = .4 + .6 * Math.abs(Math.sin(time / 40 + s.x)); ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill(); }
+      ctx.globalAlpha = 1;
+    }
+    ctx.save();
+    ctx.globalAlpha = L.night ? .9 : .3;
+    ctx.font = "150px serif"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+    ctx.fillText(L.deco, L.night ? W * .78 : W * .72, L.night ? 170 : H - 40);
+    ctx.restore();
+    ctx.fillStyle = L.ground[0]; ctx.fillRect(0, H - 26, W, 26);
+    ctx.fillStyle = L.ground[1];
     for (let i = 0; i < W; i += 24) { ctx.beginPath(); ctx.arc(i + 12, H - 26, 12, Math.PI, 0); ctx.fill(); }
   }
 
+  function drawStatus() {
+    ctx.save();
+    ctx.textBaseline = "top"; ctx.textAlign = "left"; ctx.font = "600 16px Fredoka, sans-serif";
+    ctx.fillStyle = LEVELS[level].night ? "#fff" : "#3b2f2f";
+    ctx.globalAlpha = .75;
+    ctx.fillText(`📍 ${LEVELS[level].name}`, 12, 12);
+    if (combo >= 5) { ctx.textAlign = "right"; ctx.fillText(`🔥 ${combo}er Combo`, W - 12, 12); }
+    ctx.globalAlpha = 1;
+    let y = 36;
+    for (const [t, max, em] of [[shieldT, 360, "🛡️"], [magnetT, 420, "🧲"]]) {
+      if (t <= 0) continue;
+      ctx.font = "18px serif"; ctx.fillText(em, 12, y);
+      ctx.fillStyle = "rgba(0,0,0,.12)"; ctx.fillRect(38, y + 6, 80, 8);
+      ctx.fillStyle = em === "🛡️" ? "#60a5fa" : "#f87171"; ctx.fillRect(38, y + 6, 80 * t / max, 8);
+      ctx.fillStyle = LEVELS[level].night ? "#fff" : "#3b2f2f";
+      y += 24;
+    }
+    ctx.restore();
+
+    if (banner) {
+      const a = Math.min(1, banner.t / 30, (150 - banner.t) / 20 + .2);
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, a);
+      ctx.fillStyle = "rgba(255,255,255,.9)";
+      ctx.beginPath(); ctx.roundRect(50, 120, W - 100, 90, 22); ctx.fill();
+      ctx.fillStyle = "#3b2f2f"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = "600 18px Fredoka, sans-serif"; ctx.fillText(banner.sub, W / 2, 148);
+      ctx.font = "700 30px Fredoka, sans-serif"; ctx.fillText(banner.text, W / 2, 182);
+      ctx.restore();
+      if (--banner.t <= 0) banner = null;
+    }
+  }
+
   function centerText(lines) {
-    ctx.fillStyle = "rgba(255,255,255,.85)";
-    ctx.beginPath(); ctx.roundRect(40, H / 2 - 120, W - 80, 220, 24); ctx.fill();
-    ctx.fillStyle = "#3b2f2f"; ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,255,255,.88)";
+    ctx.beginPath(); ctx.roundRect(40, H / 2 - 130, W - 80, 240, 24); ctx.fill();
+    ctx.fillStyle = "#3b2f2f"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
     lines.forEach(([txt, size, y]) => { ctx.font = `600 ${size}px Fredoka, sans-serif`; ctx.fillText(txt, W / 2, H / 2 + y); });
   }
 
@@ -479,19 +1059,60 @@ countUp(document.getElementById("cheese"), 47, 2200);
     "Die Maus ist satt und müde.",
     "Zeit für ein Nickerchen im Käse.",
     "Die Katze war heute zu schnell.",
-    "Morgen wird weiter gesammelt!"
+    "Morgen wird weiter gesammelt!",
+    "Die Maus braucht kurz Urlaub vom Urlaub.",
   ];
-  let goLine = gameOverLines[0];
+
+  function catchItem(it) {
+    it.dead = true;
+    if (it.kind === "enemy") {
+      if (shieldT > 0) { burst(it.x, it.y, "✨"); popText(it.x, it.y - 20, "Abgewehrt!", "#3b82f6"); sound.power(); return; }
+      lives--; flash = 40; combo = 0; burst(it.x, it.y, "💥");
+      sound.hurt();
+      if (navigator.vibrate) navigator.vibrate(120);
+      if (lives <= 0) return gameOver();
+    } else if (it.kind === "shield") { shieldT = 360; sound.power(); popText(it.x, it.y - 20, "Schutzschild!", "#3b82f6"); }
+    else if (it.kind === "magnet") { magnetT = 420; sound.power(); popText(it.x, it.y - 20, "Käse-Magnet!", "#ef4444"); }
+    else if (it.kind === "life") { lives = Math.min(5, lives + 1); sound.power(); popText(it.x, it.y - 20, "+1 Leben!", "#e11d48"); }
+    else {
+      combo++;
+      const bonus = combo > 0 && combo % 10 === 0 ? 3 : 0;
+      const pts = (it.kind === "cake" ? 5 : 1) + bonus;
+      score += pts; mouse.squish = 1;
+      burst(it.x, it.y, it.kind === "cake" ? "✨" : "⭐", 6);
+      popText(it.x, it.y - 24, bonus ? `+${pts} Combo!` : `+${pts}`);
+      it.kind === "cake" || bonus ? sound.cake() : sound.catch();
+      const next = LEVELS[level + 1];
+      if (next && score >= next.at) {
+        level++;
+        banner = { sub: "✈️ Weiter geht die Reise nach …", text: `${next.deco} ${next.name}!`, t: 150 };
+        sound.level();
+        burst(W / 2, H / 2, "🎉", 16);
+      }
+    }
+    updateHud();
+  }
+
+  function gameOver() {
+    state = "over";
+    updateHud();
+    sound.over();
+    const isBest = score > best;
+    if (isBest) { best = score; store.set("best", best); bestEl.textContent = best; }
+    document.getElementById("ovLine").textContent = rand(gameOverLines);
+    document.getElementById("ovScore").textContent = `${score} Punkte · bis ${LEVELS[level].deco} ${LEVELS[level].name}`;
+    document.getElementById("ovRecord").textContent = isBest && score > 0 ? "🎉 Neuer persönlicher Rekord!" : "";
+    scoreForm.hidden = score <= 0;
+    scoreForm.querySelector("button").disabled = false;
+    ovMsg.textContent = "";
+    setTimeout(() => { overlay.hidden = false; if (isBest && score > 0) confetti(); }, 500);
+  }
 
   function loop() {
-    ctx.clearRect(0, 0, W, H);
-    drawGround();
-
     if (state === "play") {
       time++;
-      speed = 1 + time / 1800;
       spawnT -= 1;
-      if (spawnT <= 0) { spawn(); spawnT = Math.max(16, 48 - time / 60); }
+      if (spawnT <= 0) { spawn(); spawnT = Math.max(14, 46 - time / 70 - level * 2); }
 
       if (keys.ArrowLeft) mouse.targetX -= 9;
       if (keys.ArrowRight) mouse.targetX += 9;
@@ -499,50 +1120,48 @@ countUp(document.getElementById("cheese"), 47, 2200);
       mouse.x += (mouse.targetX - mouse.x) * .3;
       mouse.squish *= .85;
       if (flash > 0) flash--;
+      if (shieldT > 0) shieldT--;
+      if (magnetT > 0) magnetT--;
 
       for (const it of items) {
         it.y += it.vy; it.rot += it.vr;
+        if (it.wob) { it.x += Math.sin(time / 12 + it.rot) * it.wob; it.x = Math.max(20, Math.min(W - 20, it.x)); }
+        const good = it.kind === "good" || it.kind === "cake";
+        if (magnetT > 0 && good && it.y > H * .25) { it.x += (mouse.x - it.x) * .09; it.y += 1.5; }
         const dx = Math.abs(it.x - mouse.x), dy = Math.abs(it.y - mouse.y);
-        if (!it.dead && dx < 42 && dy < 36) {
-          it.dead = true;
-          if (it.kind === "cat") {
-            lives--; flash = 40; burst(it.x, it.y, "💥");
-            if (navigator.vibrate) navigator.vibrate(120);
-            if (lives <= 0) {
-              state = "over";
-              goLine = gameOverLines[Math.floor(Math.random() * gameOverLines.length)];
-              if (score > best) { best = score; try { localStorage.setItem("kleinemaus-best", best); } catch (e) {} bestEl.textContent = best; }
-            }
-          } else {
-            score += it.kind === "cake" ? 5 : 1; mouse.squish = 1;
-            burst(it.x, it.y, it.kind === "cake" ? "✨" : "⭐");
-          }
-          updateHud();
-        }
+        if (!it.dead && dx < 42 && dy < 36) { catchItem(it); if (state !== "play") break; }
+        if (!it.dead && good && it.y > H) combo = 0;
       }
       items = items.filter(it => !it.dead && it.y < H + 40);
     }
 
+    drawWorld();
     for (const it of items) {
-      ctx.save(); ctx.translate(it.x, it.y); ctx.rotate(it.kind === "cat" ? Math.sin(it.rot) * .3 : it.rot);
-      ctx.font = it.kind === "cat" ? "44px serif" : "38px serif";
+      ctx.save(); ctx.translate(it.x, it.y);
+      ctx.rotate(it.kind === "enemy" ? Math.sin(it.rot) * .3 : it.kind === "good" || it.kind === "cake" ? it.rot : 0);
+      if (["shield", "magnet", "life"].includes(it.kind)) {
+        const s = 1 + Math.sin(time / 6) * .1; ctx.scale(s, s);
+        ctx.fillStyle = "rgba(255,255,255,.7)"; ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.font = it.kind === "enemy" ? "44px serif" : "36px serif";
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(it.kind === "cat" ? "🐱" : it.kind === "cake" ? "🍰" : "🧀", 0, 0);
+      ctx.fillText(it.emoji, 0, 0);
       ctx.restore();
     }
     for (const p of parts) {
-      p.x += p.vx; p.y += p.vy; p.vy += .25; p.life--;
-      ctx.globalAlpha = p.life / 40; ctx.font = "18px serif"; ctx.textAlign = "center";
-      ctx.fillText(p.emoji, p.x, p.y); ctx.globalAlpha = 1;
+      p.x += p.vx; p.y += p.vy; p.vy += p.g ?? .25; p.life--;
+      ctx.globalAlpha = Math.max(0, p.life / 40);
+      ctx.font = p.color ? `700 ${p.size}px Fredoka, sans-serif` : `${p.size}px serif`;
+      ctx.fillStyle = p.color || "#000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(p.txt, p.x, p.y); ctx.globalAlpha = 1;
     }
     parts = parts.filter(p => p.life > 0);
 
     if (flash % 8 < 4) drawMouse();
+    if (state === "play") drawStatus();
 
     if (state === "start") {
-      centerText([["🐭 Käse-Regen", 38, -60], ["Sammle 🧀 und 🍰", 22, -10], ["Weiche den 🐱 aus!", 22, 22], ["Tippen zum Starten", 20, 72]]);
-    } else if (state === "over") {
-      centerText([["Spiel vorbei!", 36, -62], [goLine, 19, -22], [`${score} Käse gesammelt` + (score >= best && score > 0 ? " 🏆" : ""), 24, 18], ["Tippen für nochmal", 20, 72]]);
+      centerText([["🐭 Käse-Regen", 38, -72], ["Sammle 🧀 und 🍰", 22, -24], ["Weiche den 🐱 aus!", 22, 8], ["Reise von 🏡 bis zum 🌕", 20, 40], ["👆 Tippen zum Starten", 20, 86]]);
     }
     requestAnimationFrame(loop);
   }
@@ -551,18 +1170,75 @@ countUp(document.getElementById("cheese"), 47, 2200);
     const r = cv.getBoundingClientRect();
     return (clientX - r.left) * (W / r.width);
   }
-  function start() { if (state !== "play") { reset(); state = "play"; } }
+  function start() {
+    if (state === "play") return;
+    reset(); state = "play"; overlay.hidden = true;
+    banner = { sub: "Los geht's! Erster Stopp:", text: "🏡 Zuhause", t: 110 };
+  }
 
-  cv.addEventListener("pointerdown", e => { start(); mouse.targetX = toCanvasX(e.clientX); });
+  cv.addEventListener("pointerdown", e => { if (state === "start") start(); mouse.targetX = toCanvasX(e.clientX); });
   cv.addEventListener("pointermove", e => { if (state === "play") mouse.targetX = toCanvasX(e.clientX); });
-  window.addEventListener("keydown", e => {
-    if (!["ArrowLeft", "ArrowRight", " "].includes(e.key)) return;
+  addEventListener("keydown", e => {
+    if (!["ArrowLeft", "ArrowRight", " "].includes(e.key) || e.target.tagName === "INPUT") return;
     const r = cv.getBoundingClientRect();
     if (r.bottom < 0 || r.top > innerHeight) return;
     e.preventDefault();
-    if (e.key === " ") start(); else { keys[e.key] = true; start(); }
+    if (e.key !== " ") keys[e.key] = true;
+    if (state === "start" || (state === "over" && e.key === " ")) start();
   });
-  window.addEventListener("keyup", e => { keys[e.key] = false; });
+  addEventListener("keyup", e => { keys[e.key] = false; });
+  document.getElementById("againBtn").addEventListener("click", start);
+
+  // Leaderboard
+  let myEntryAt = store.get("myEntryAt", []);
+  function renderBoard(top, highlightRank) {
+    boardEl.innerHTML = "";
+    if (!top.length) { boardEl.innerHTML = '<li class="empty">Noch leer. Hol dir Platz 1! 🥇</li>'; return; }
+    top.forEach((e, i) => {
+      const li = document.createElement("li");
+      if (highlightRank === i + 1 || myEntryAt.includes(e.at)) li.className = "me";
+      const r = document.createElement("span"); r.className = "r"; r.textContent = ["🥇", "🥈", "🥉"][i] || i + 1;
+      const n = document.createElement("span"); n.className = "n"; n.textContent = e.name;
+      const s = document.createElement("span"); s.textContent = `${e.score} 🧀`;
+      li.append(r, n, s); boardEl.appendChild(li);
+    });
+  }
+  fetch(API + "/scores").then(r => r.json()).then(t => renderBoard(t)).catch(() => {
+    boardEl.innerHTML = '<li class="empty">Bestenliste gerade nicht erreichbar 🙈</li>';
+  });
+
+  scoreForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const name = nameInput.value.trim() || "Anonyme Maus";
+    store.set("name", name);
+    const btn = scoreForm.querySelector("button");
+    btn.disabled = true; ovMsg.textContent = "Wird eingetragen …";
+    try {
+      const res = await fetch(API + "/scores", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, score }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      if (data.rank) {
+        myEntryAt = [...myEntryAt, data.top[data.rank - 1].at].slice(-20); store.set("myEntryAt", myEntryAt);
+        ovMsg.textContent = data.rank === 1 ? "🥇 PLATZ 1! Die Maus ist sprachlos!" : `🎉 Platz ${data.rank} in der Bestenliste!`;
+        if (data.rank <= 3) confetti(220);
+      } else {
+        ovMsg.textContent = "Knapp nicht in den Top 10, aber die Maus ist trotzdem stolz! 💕";
+      }
+      renderBoard(data.top, data.rank);
+      scoreForm.hidden = true;
+    } catch (ex) {
+      ovMsg.textContent = ex.message || "Hat nicht geklappt 🙈";
+      btn.disabled = false;
+    }
+  });
+
+  // Test hook: open the page with #debug to drive the game from the console.
+  if (location.hash === "#debug") {
+    window.game = {
+      give: (kind, n = 1) => { for (let i = 0; i < n && state === "play"; i++) catchItem({ kind, x: W / 2, y: H / 2 }); },
+      get state() { return { state, score, lives, level: LEVELS[level].name }; },
+    };
+  }
 
   reset();
   loop();
