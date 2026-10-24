@@ -4,6 +4,8 @@
 const ALLOWED_ORIGINS = ["https://kleinemaus.wenz.io", "http://localhost:8080"];
 const MODEL = "@cf/deepseek-ai/deepseek-v4.1-flash-1017";
 const MAX_SCORE = 5000;
+// Hard cap on AI trips per day across all visitors, so the Workers AI bill stays bounded.
+const MAX_TRIPS_PER_DAY = 200;
 
 function cors(req) {
   const origin = req.headers.get("Origin") || "";
@@ -37,6 +39,15 @@ async function limited(env, req, bucket, max, ttl) {
   const n = +(await env.KV.get(key)) || 0;
   if (n >= max) return true;
   await env.KV.put(key, String(n + 1), { expirationTtl: ttl });
+  return false;
+}
+
+// Global per-day counter (UTC). Not atomic, so it may overshoot by a few under load.
+async function dailyCapReached(env, bucket, max) {
+  const key = `day:${bucket}:${new Date().toISOString().slice(0, 10)}`;
+  const n = +(await env.KV.get(key)) || 0;
+  if (n >= max) return true;
+  await env.KV.put(key, String(n + 1), { expirationTtl: 2 * 86400 });
   return false;
 }
 
@@ -91,6 +102,7 @@ async function trips(req, env) {
   const destination = clean(body.destination, 40);
   if (destination.length < 2) return json(req, { error: "Wohin denn? 🗺️" }, 400);
   if (await limited(env, req, "trip", 6, 3600)) return json(req, { error: "Die Maus ist müde vom vielen Reisen. Probier es in einer Stunde nochmal! 😴" }, 429);
+  if (await dailyCapReached(env, "trip", MAX_TRIPS_PER_DAY)) return json(req, { error: "Die Maus ist heute schon so viel gereist, dass sie eingeschlafen ist. Morgen geht's weiter! 💤" }, 429);
 
   // The model reasons before answering; if that eats the token budget the answer is empty, so retry once.
   let data = null;
