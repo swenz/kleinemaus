@@ -1,13 +1,16 @@
 // API für kleinemaus.wenz.io – Bestenliste, Fütter-Zähler und KI-Reiseziele.
-// Bindings: STATE (Durable Object, hält alle Daten in SQLite), AI (Workers AI), KV (nur noch für die einmalige Übernahme alter Daten)
+// Bindings: STATE (Durable Object, hält alle Daten in SQLite), AI (Workers AI), LIMITER (Edge-Rate-Limit pro IP),
+// KV (nur noch für die einmalige Übernahme alter Daten)
 
 import { DurableObject } from "cloudflare:workers";
 
 const ALLOWED_ORIGINS = ["https://kleinemaus.wenz.io", "http://localhost:8080"];
 const MODEL = "@cf/deepseek-ai/deepseek-v4.1-flash-1017";
 const MAX_SCORE = 5000;
-// Hard cap on AI trips per day across all visitors, so the Workers AI bill stays bounded.
-const MAX_TRIPS_PER_DAY = 200;
+// Hard cap on AI calls (retries included) per day across all visitors, so the Workers AI bill stays bounded.
+const MAX_AI_CALLS_PER_DAY = 200;
+// GET responses are cached at the edge this long, so read traffic rarely reaches the Durable Object.
+const CACHE_SECONDS = 15;
 // The game can't yield more than ~5 points per second even at top speed; anything above is a fake.
 const MAX_POINTS_PER_SEC = 6;
 const GAME_TTL = 3 * 3600 * 1000;
@@ -167,7 +170,7 @@ Beispiele für den Ton:
 Wenn das Reiseziel unpassend, beleidigend oder nicht jugendfrei ist, schreibe stattdessen über einen gemütlichen Ausflug in eine Käserei und setze "safe" auf false.
 Antworte NUR mit JSON: {"safe": true/false, "place": "Ortsname kurz", "emoji": "2 passende Emojis", "title": "kurzer origineller Titel", "text": "3-4 kurze Sätze, max 340 Zeichen", "mood": Zahl 70-100}`;
 
-async function trips(req, env, db) {
+async function trips(req, db, env) {
   if (req.method === "GET") return json(req, await db.trips());
 
   const body = await req.json().catch(() => ({}));
@@ -175,11 +178,13 @@ async function trips(req, env, db) {
   if (destination.length < 2) return json(req, { error: "Wohin denn? 🗺️" }, 400);
   if (BLOCKED.test(destination)) return json(req, { error: "Da will die Maus lieber nicht hin. Wie wär's mit einer Käserei? 🧀" }, 400);
   if (await db.limited(`trip:${ipOf(req)}`, 6, 3600)) return json(req, { error: "Die Maus ist müde vom vielen Reisen. Probier es in einer Stunde nochmal! 😴" }, 429);
-  if (await db.limited(`day:trip:${new Date().toISOString().slice(0, 10)}`, MAX_TRIPS_PER_DAY, 86400)) return json(req, { error: "Die Maus ist heute schon so viel gereist, dass sie eingeschlafen ist. Morgen geht's weiter! 💤" }, 429);
-
   // No reasoning + JSON mode: answers in ~2 s for well under a tenth of a cent. Retry once if the JSON is still broken.
   let data = null;
   for (let attempt = 0; attempt < 2 && !data?.text; attempt++) {
+    if (await db.limited(`day:ai:${new Date().toISOString().slice(0, 10)}`, MAX_AI_CALLS_PER_DAY, 86400)) {
+      if (attempt) break;
+      return json(req, { error: "Die Maus ist heute schon so viel gereist, dass sie eingeschlafen ist. Morgen geht's weiter! 💤" }, 429);
+    }
     const ai = await env.AI.run(MODEL, {
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
@@ -216,16 +221,36 @@ async function trips(req, env, db) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     if (req.method === "OPTIONS") return new Response(null, { headers: cors(req) });
     const { pathname } = new URL(req.url);
+    const handler = { "/scores": scores, "/game": game, "/stats": stats, "/trips": trips }[pathname];
+    if (!handler) return json(req, { hello: "Piep! 🐭" });
+
+    // Flood protection before anything that costs: the edge limiter needs no Durable Object round trip.
+    const { success } = await env.LIMITER.limit({ key: ipOf(req) });
+    if (!success) return json(req, { error: "Zu viele Anfragen, kurz Pause! 🐭" }, 429);
+
+    // Reads come from the edge cache; the key ignores the Origin, CORS headers are added per request.
+    const cacheKey = new Request(`https://cache.kleinemaus-api${pathname}`);
+    const cache = caches.default;
+    if (req.method === "GET") {
+      const hit = await cache.match(cacheKey);
+      if (hit) return new Response(hit.body, { headers: { "Content-Type": "application/json; charset=utf-8", ...cors(req) } });
+    }
+
     const db = env.STATE.get(env.STATE.idFromName("global"));
     try {
-      if (pathname === "/scores") return await scores(req, db);
-      if (pathname === "/game") return await game(req, db);
-      if (pathname === "/stats") return await stats(req, db);
-      if (pathname === "/trips") return await trips(req, env, db);
-      return json(req, { hello: "Piep! 🐭" });
+      const res = await handler(req, db, env);
+      if (res.ok) {
+        if (req.method === "GET") {
+          ctx.waitUntil(cache.put(cacheKey, new Response(res.clone().body, { headers: { "Cache-Control": `max-age=${CACHE_SECONDS}` } })));
+        } else if (pathname !== "/game") {
+          // Writers see their change right away (in their own data center at least).
+          ctx.waitUntil(cache.delete(cacheKey));
+        }
+      }
+      return res;
     } catch (e) {
       console.error(e);
       return json(req, { error: "Huch, da ist was schiefgegangen 🐭" }, 500);
