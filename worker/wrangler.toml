@@ -10,3 +10,11 @@ id = "abdca3d510024afc92aa63b1ac0e4108"
 
 [ai]
 binding = "AI"
+
+[[durable_objects.bindings]]
+name = "STATE"
+class_name = "MouseState"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["MouseState"]

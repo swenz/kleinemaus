@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Die kleine Maus auf Reisen</title>
 <meta name="description" content="Das Reisetagebuch einer sehr kleinen, sehr glücklichen Maus. Mit Käse-Minispiel, Kleiderschrank und KI-Reisewünschen.">
-<meta name="theme-color" content="#ffb3c6">
+<meta name="theme-color" content="#ffb3c6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#2b2428" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kleinemaus.wenz.io/">
 <meta property="og:title" content="🐭 Die kleine Maus geht auf Reisen">
@@ -17,6 +19,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐭</text></svg>">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
@@ -34,7 +37,31 @@
     --sky: #bde0fe;
     --mint: #c7f0d8;
     --shadow: 0 10px 30px rgba(120, 70, 40, .12);
+    --sky-2: #e8f4ff;
+    --cloud: #fff;
+    --field: #fff;
+    --row: #fffaf3;
+    --veil: rgba(255, 248, 239, .82);
+    --error: #c2410c;
   }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1f1a1d;
+      --paper: #2b2428;
+      --ink: #f5ece6;
+      --muted: #b8a9a1;
+      --pink-soft: #4a2f39;
+      --sky: #1d2742;
+      --sky-2: #231f30;
+      --cloud: #3a3f5c;
+      --field: #241e22;
+      --row: #332a2f;
+      --veil: rgba(31, 26, 29, .85);
+      --error: #fb923c;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+  }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
@@ -74,13 +101,13 @@
     position: relative;
     overflow: hidden;
     padding: 40px 16px 80px;
-    background: linear-gradient(180deg, var(--sky) 0%, #e8f4ff 55%, transparent 100%);
+    background: linear-gradient(180deg, var(--sky) 0%, var(--sky-2) 55%, transparent 100%);
   }
   .cloud {
-    position: absolute; background: #fff; border-radius: 999px; opacity: .9;
+    position: absolute; background: var(--cloud); border-radius: 999px; opacity: .9;
     animation: drift linear infinite;
   }
-  .cloud::before, .cloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
+  .cloud::before, .cloud::after { content: ""; position: absolute; background: var(--cloud); border-radius: 50%; }
   .cloud::before { width: 55%; height: 160%; left: 15%; top: -70%; }
   .cloud::after { width: 40%; height: 130%; right: 12%; top: -45%; }
   @keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
@@ -105,7 +132,7 @@
   }
   .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--pink-dark); }
   .btn:disabled { opacity: .55; cursor: wait; }
-  .btn.cheese { background: var(--cheese); color: var(--ink); box-shadow: 0 6px 0 var(--cheese-dark); }
+  .btn.cheese { background: var(--cheese); color: #3b2f2f; box-shadow: 0 6px 0 var(--cheese-dark); }
   .btn.cheese:active { box-shadow: 0 2px 0 var(--cheese-dark); }
   .btn.small { font-size: 1rem; padding: 10px 18px; box-shadow: 0 4px 0 var(--pink-dark); }
   .btn.small.cheese { box-shadow: 0 4px 0 var(--cheese-dark); }
@@ -132,7 +159,7 @@
   .care-stage .mouse-svg { width: 220px; overflow: visible; }
   .bubble {
     position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
-    background: var(--ink); color: #fff; font-weight: 600; font-size: .95rem;
+    background: var(--ink); color: var(--bg); font-weight: 600; font-size: .95rem;
     padding: 8px 14px; border-radius: 16px; white-space: nowrap;
     opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none;
   }
@@ -147,7 +174,7 @@
   .wardrobe h3 { margin: 14px 0 8px; font-size: 1.05rem; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip {
-    border: 2px solid var(--pink-soft); background: #fff; border-radius: 999px;
+    border: 2px solid var(--pink-soft); background: var(--field); border-radius: 999px;
     padding: 7px 13px; cursor: pointer; font-size: .98rem; color: var(--ink);
     transition: background .15s, border-color .15s, transform .1s;
   }
@@ -195,7 +222,7 @@
   .wish-form { display: flex; gap: 10px; flex-wrap: wrap; }
   .wish-form input {
     flex: 1 1 220px; min-width: 0; font-size: 1.1rem; padding: 13px 18px;
-    border: 2px solid var(--pink-soft); border-radius: 999px; outline: none; color: var(--ink);
+    border: 2px solid var(--pink-soft); border-radius: 999px; outline: none; color: var(--ink); background: var(--field);
   }
   .wish-form input:focus { border-color: var(--pink); }
   .wish-chips { margin-top: 12px; }
@@ -204,13 +231,15 @@
   .loading.on { display: block; }
   .loading .packer { font-size: 3rem; display: inline-block; animation: wiggle .8s ease-in-out infinite; }
   .loading p { color: var(--muted); margin: 8px 0 0; }
-  .wish-error { color: #c2410c; text-align: center; margin: 12px 0 0; min-height: 1.2em; }
+  .wish-error { color: var(--error); text-align: center; margin: 12px 0 0; min-height: 1.2em; }
   .trips { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; margin-top: 24px; }
   .trips .entry { width: auto; opacity: 1; transform: none; }
   .trips .entry.new { animation: arrive .7s cubic-bezier(.2,1.6,.4,1); outline: 3px solid var(--cheese); }
   @keyframes arrive { from { transform: scale(.6) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
   .trips .wished { font-size: .85rem; color: var(--muted); margin-bottom: 8px; }
   .trips .pic { height: 96px; font-size: 3.2rem; }
+  .trips .entry.linked { outline: 3px solid var(--pink); }
+  .share-btn { position: absolute; top: 14px; right: 14px; z-index: 1; background: var(--paper); border: 0; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; font-size: 1rem; box-shadow: var(--shadow); }
   .caret::after { content: "▍"; animation: caret .8s steps(1) infinite; color: var(--pink); }
   @keyframes caret { 50% { opacity: 0; } }
   .trips-empty { text-align: center; color: var(--muted); grid-column: 1 / -1; }
@@ -219,7 +248,7 @@
   .game-card { max-width: 640px; margin: 0 auto; padding: 18px; }
   .hud { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.1rem; padding: 4px 8px 12px; gap: 10px; }
   .hud .hearts { letter-spacing: 1px; }
-  .icon-btn { background: var(--pink-soft); border: 0; border-radius: 50%; width: 38px; height: 38px; font-size: 1.1rem; cursor: pointer; }
+  .icon-btn { background: var(--pink-soft); color: var(--ink); border: 0; border-radius: 50%; width: 38px; height: 38px; font-size: 1.1rem; cursor: pointer; }
   .stage { position: relative; }
   #game {
     width: 100%; aspect-ratio: 3 / 4; max-height: 70vh; display: block; margin: 0 auto;
@@ -228,7 +257,7 @@
   }
   .overlay {
     position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
-    background: rgba(255, 248, 239, .82); backdrop-filter: blur(3px); border-radius: 20px; padding: 20px;
+    background: var(--veil); backdrop-filter: blur(3px); border-radius: 20px; padding: 20px;
   }
   .overlay[hidden] { display: none; }
   .overlay h3 { font-size: 2rem; margin: 0 0 4px; }
@@ -236,14 +265,15 @@
   .overlay .big { font-size: 1.5rem; font-weight: 700; color: var(--pink); }
   .overlay form[hidden] { display: none; }
   .overlay form { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 16px 0 8px; }
-  .overlay input { font-size: 1.05rem; padding: 10px 16px; border-radius: 999px; border: 2px solid var(--pink-soft); outline: none; width: 190px; }
+  .overlay input { font-size: 1.05rem; padding: 10px 16px; border-radius: 999px; border: 2px solid var(--pink-soft); outline: none; width: 190px; color: var(--ink); background: var(--field); }
+  .overlay .btn-row { gap: 10px; }
   .overlay input:focus { border-color: var(--pink); }
   .ov-msg { min-height: 1.3em; color: var(--muted); font-size: .95rem; }
   .game-help { text-align: center; color: var(--muted); font-size: .95rem; margin: 12px 0 2px; line-height: 1.6; }
   .board { margin-top: 18px; border-top: 2px dashed var(--pink-soft); padding-top: 14px; }
   .board h3 { text-align: center; margin: 0 0 10px; }
   .board ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-  .board li { display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 14px; background: #fffaf3; }
+  .board li { display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 14px; background: var(--row); }
   .board li.me { background: var(--pink-soft); font-weight: 700; }
   .board li .r { font-weight: 700; text-align: center; }
   .board li .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -252,7 +282,7 @@
   /* Postcard */
   .postcard {
     display: grid; grid-template-columns: 1.2fr 1fr; gap: 0;
-    background: #fffdf8; border-radius: 10px; box-shadow: var(--shadow);
+    background: #fffdf8; color: #3b2f2f; border-radius: 10px; box-shadow: var(--shadow);
     padding: 26px; max-width: 760px; margin: 0 auto; rotate: -1.2deg;
     border: 1px solid #f0e2d0;
   }
@@ -283,7 +313,8 @@
     .card { padding: 16px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero-mouse, .cloud { animation: none; }
+    html { scroll-behavior: auto; }
+    .hero-mouse, .cloud, .mouse-svg.chomp, .mouse-svg.wiggle, .loading .packer, .trips .entry.new { animation: none; }
     .entry { transition: none; opacity: 1; transform: none; }
   }
 </style>
@@ -423,8 +454,8 @@
         <button class="btn" id="wishBtn">✈️ Los, kleine Maus!</button>
       </form>
       <div class="chips wish-chips" id="wishChips"></div>
-      <div class="loading" id="loading"><span class="packer">🎒</span><p id="loadingText">Die Maus packt ihren Rucksack …</p></div>
-      <p class="wish-error" id="wishError"></p>
+      <div class="loading" id="loading" aria-live="polite"><span class="packer">🎒</span><p id="loadingText">Die Maus packt ihren Rucksack …</p></div>
+      <p class="wish-error" id="wishError" role="alert"></p>
       <p class="ai-note">✨ Die Einträge entstehen in Echtzeit mit einem KI-Sprachmodell und sind für alle Besucher sichtbar.</p>
     </div>
     <div class="trips" id="trips"></div>
@@ -438,10 +469,11 @@
         <span>🧀 <span id="score">0</span></span>
         <span class="hearts" id="hearts">❤️❤️❤️</span>
         <span>🏆 <span id="best">0</span></span>
-        <button class="icon-btn" id="muteBtn" aria-label="Ton an/aus">🔊</button>
+        <button class="icon-btn" id="muteBtn" aria-label="Ton aus" aria-pressed="false">🔊</button>
       </div>
       <div class="stage">
-        <canvas id="game" width="480" height="640" aria-label="Käse-Regen Spielfeld"></canvas>
+        <canvas id="game" width="480" height="640" role="img" aria-label="Käse-Regen Spielfeld"></canvas>
+        <p class="sr-only" id="gameLive" aria-live="polite"></p>
         <div class="overlay" id="overlay" hidden>
           <div>
             <h3 id="ovTitle">Spiel vorbei!</h3>
@@ -452,13 +484,16 @@
               <input id="nameInput" maxlength="16" placeholder="Dein Name" autocomplete="nickname" aria-label="Dein Name">
               <button class="btn small">🏆 Eintragen</button>
             </form>
-            <p class="ov-msg" id="ovMsg"></p>
-            <button class="btn small cheese" id="againBtn">🔄 Nochmal</button>
+            <p class="ov-msg" id="ovMsg" aria-live="polite"></p>
+            <div class="btn-row">
+              <button class="btn small cheese" id="againBtn">🔄 Nochmal</button>
+              <button class="btn small" id="shareBtn" type="button">📤 Teilen</button>
+            </div>
           </div>
         </div>
       </div>
       <p class="game-help">
-        Maus bewegen: Finger/Maus ziehen oder ← → Pfeiltasten<br>
+        Maus bewegen: Finger/Maus ziehen oder ← → Pfeiltasten · Pause: P<br>
         🧀 = +1 · 🍰 = +5 · 🛡️ Schutzschild · 🧲 Käse-Magnet · 💖 Extra-Leben · 🐱 = autsch
       </p>
       <div class="board">
@@ -506,6 +541,17 @@ const store = {
   set(key, val) { try { localStorage.setItem("kleinemaus-" + key, JSON.stringify(val)); } catch (e) {} },
 };
 const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Native share sheet where available, otherwise copy to clipboard. Returns a short status text.
+async function share(text, url) {
+  if (navigator.share) {
+    try { await navigator.share({ title: "Die kleine Maus auf Reisen", text, url }); return ""; }
+    catch (e) { if (e.name === "AbortError") return ""; }
+  }
+  try { await navigator.clipboard.writeText(`${text} ${url}`); return "📋 Link kopiert!"; }
+  catch (e) { return "Teilen hat nicht geklappt 🙈"; }
+}
 
 // ---------- Sound (synthesized, no files) ----------
 const sound = (() => {
@@ -543,6 +589,7 @@ const sound = (() => {
 
 // ---------- Confetti ----------
 function confetti(amount = 160) {
+  if (reducedMotion) return;
   const cv = document.getElementById("confetti");
   const ctx = cv.getContext("2d");
   cv.hidden = false;
@@ -588,6 +635,7 @@ const EXTRA_POS = {
   "🕶️": { x: 100, y: 103, s: 46 }, "🌸": { x: 150, y: 48, s: 30 }, "🎀": { x: 52, y: 46, s: 32 }, "🧣": { x: 100, y: 150, s: 56 },
 };
 let look = { hat: "travel", extra: "", fur: "grau", ...store.get("look", {}) };
+let onLookChange = () => {};
 
 function mouseSVG() {
   return `<svg class="mouse-svg" viewBox="0 0 200 200" aria-hidden="true">
@@ -636,6 +684,7 @@ function applyLook() {
     if (pos) { ex.setAttribute("x", pos.x); ex.setAttribute("y", pos.y); ex.setAttribute("font-size", pos.s); }
   }
   store.set("look", look);
+  onLookChange();
 }
 
 function makeChips(hostId, items, key) {
@@ -697,18 +746,20 @@ function say(text) {
 }
 function wiggle() { careSvg.classList.remove("wiggle"); void careSvg.offsetWidth; careSvg.classList.add("wiggle"); }
 
-// Meters decay slowly while you're away (1 point per 3 minutes).
+// Meters decay slowly, also while you're away (1 point per 3 minutes).
 let pet = { hunger: 70, love: 70, t: Date.now(), ...store.get("pet", {}) };
-{
+function decayPet() {
   const lost = Math.floor((Date.now() - pet.t) / 180000);
-  pet.hunger = Math.max(0, pet.hunger - lost); pet.love = Math.max(0, pet.love - lost); pet.t = Date.now();
+  if (lost <= 0) return;
+  pet.hunger = Math.max(0, pet.hunger - lost); pet.love = Math.max(0, pet.love - lost); pet.t += lost * 180000;
 }
 function renderPet() {
   document.getElementById("hungerBar").style.width = pet.hunger + "%";
   document.getElementById("loveBar").style.width = pet.love + "%";
-  pet.t = Date.now(); store.set("pet", pet);
+  store.set("pet", pet);
 }
-renderPet();
+decayPet(); renderPet();
+setInterval(() => { decayPet(); renderPet(); }, 60000);
 setTimeout(() => {
   if (pet.hunger < 30) say("Ich hab sooo Hunger … 🥺");
   else if (pet.love < 30) say("Knuddelst du mich? 🥺");
@@ -722,16 +773,21 @@ function renderGlobal() {
   globalEl.textContent = `Von allen Besuchern schon ${fed.toLocaleString("de-DE")}× gefüttert und ${cud.toLocaleString("de-DE")}× geknuddelt.`;
 }
 fetch(API + "/stats").then(r => r.json()).then(s => { globalStats = s; renderGlobal(); }).catch(() => {});
-setInterval(() => {
+// Taps are batched to keep requests (and costs) low; whatever is left gets sent when the page closes.
+function flushStats(leaving) {
   for (const kind of ["feed", "cuddle"]) {
     const n = pending[kind];
     if (!n) continue;
     pending[kind] = 0;
-    fetch(API + "/stats", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, n }) })
+    const body = JSON.stringify({ kind, n });
+    if (leaving) { navigator.sendBeacon?.(API + "/stats", body); continue; }
+    fetch(API + "/stats", { method: "POST", body })
       .then(r => r.json()).then(s => { globalStats = s; renderGlobal(); })
       .catch(() => { if (globalStats) globalStats[kind === "feed" ? "fed" : "cuddled"] += n; });
   }
-}, 2000);
+}
+setInterval(() => flushStats(false), 10000);
+addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushStats(true); });
 
 const SNACKS = ["🧀", "🧀", "🧀", "🍰", "🥐", "🍕", "🫐", "🍓"];
 document.getElementById("feedBtn").addEventListener("click", e => {
@@ -821,13 +877,20 @@ countUp(document.getElementById("cheese"), 47, 2200);
     pic.className = "pic"; pic.style.background = PIC_BG[parseInt(t.id, 16) % PIC_BG.length] || PIC_BG[0];
     pic.textContent = t.emoji;
     const day = document.createElement("div"); day.className = "day"; day.textContent = `${t.place} · ${ago(t.at)}`;
-    const wished = document.createElement("div"); wished.className = "wished"; wished.textContent = `Wunschziel: „${t.wish}“`;
+    const wished = document.createElement("div"); wished.className = "wished"; wished.textContent = t.wish ? `Wunschziel: „${t.wish}“` : "Wunschziel: geheim 🤫";
     const h = document.createElement("h3"); h.textContent = t.title;
     const p = document.createElement("p");
     const mood = document.createElement("div"); mood.className = "mood";
     mood.innerHTML = `Laune <div class="mood-bar"><i style="width:${t.mood}%"></i></div> ${t.mood >= 95 ? "🤩" : t.mood >= 85 ? "😊" : "🙂"}`;
-    a.append(pic, day, wished, h, p, mood);
-    if (isNew) {
+    a.id = "reise-" + t.id;
+    const sb = document.createElement("button");
+    sb.type = "button"; sb.className = "share-btn"; sb.textContent = "📤"; sb.setAttribute("aria-label", "Reise teilen");
+    sb.addEventListener("click", async () => {
+      const msg = await share(`🐭 Die kleine Maus war in ${t.place}: „${t.title}“`, `${location.origin}/#reise-${t.id}`);
+      if (msg) { sb.textContent = "✅"; setTimeout(() => { sb.textContent = "📤"; }, 1500); }
+    });
+    a.append(sb, pic, day, wished, h, p, mood);
+    if (isNew && !reducedMotion) {
       // Typewriter effect so you can watch the AI's text appear.
       p.classList.add("caret");
       let i = 0;
@@ -847,6 +910,9 @@ countUp(document.getElementById("cheese"), 47, 2200);
     list.innerHTML = "";
     trips.forEach(t => list.appendChild(card(t, false)));
     renderEmpty();
+    // Shared link to a single trip: jump there and highlight it.
+    const linked = location.hash.startsWith("#reise-") && document.getElementById(location.hash.slice(1));
+    if (linked) { linked.classList.add("linked"); linked.scrollIntoView({ block: "center" }); }
   }).catch(renderEmpty);
 
   form.addEventListener("submit", async e => {
@@ -857,7 +923,7 @@ countUp(document.getElementById("cheese"), 47, 2200);
     let k = 0; loadingText.textContent = PACKING[0];
     const iv = setInterval(() => { loadingText.textContent = PACKING[++k % PACKING.length]; }, 1300);
     try {
-      const res = await fetch(API + "/trips", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ destination }) });
+      const res = await fetch(API + "/trips", { method: "POST", body: JSON.stringify({ destination }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Hoppla!");
       list.querySelector(".trips-empty")?.remove();
@@ -878,7 +944,11 @@ countUp(document.getElementById("cheese"), 47, 2200);
 (() => {
   const cv = document.getElementById("game");
   const ctx = cv.getContext("2d");
-  const W = cv.width, H = cv.height;
+  const W = 480, H = 640;
+  // Draw in logical 480×640 units, but at full device resolution so it's sharp on retina screens.
+  const dpr = Math.min(2.5, devicePixelRatio || 1);
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const scoreEl = document.getElementById("score");
   const heartsEl = document.getElementById("hearts");
   const bestEl = document.getElementById("best");
@@ -888,12 +958,14 @@ countUp(document.getElementById("cheese"), 47, 2200);
   const scoreForm = document.getElementById("scoreForm");
   const ovMsg = document.getElementById("ovMsg");
   const muteBtn = document.getElementById("muteBtn");
+  const live = document.getElementById("gameLive");
 
   let best = +store.get("best", 0) || 0;
   bestEl.textContent = best;
   nameInput.value = store.get("name", "");
-  muteBtn.textContent = sound.muted ? "🔇" : "🔊";
-  muteBtn.addEventListener("click", () => { muteBtn.textContent = sound.toggle() ? "🔇" : "🔊"; });
+  const renderMute = () => { muteBtn.textContent = sound.muted ? "🔇" : "🔊"; muteBtn.setAttribute("aria-pressed", String(sound.muted)); };
+  renderMute();
+  muteBtn.addEventListener("click", () => { sound.toggle(); renderMute(); });
 
   const LEVELS = [
     { name: "Zuhause",         at: 0,   sky: ["#cdeafe", "#fff3d6"], ground: ["#b8e6a8", "#9bd68a"], deco: "🏡", goodie: "🧀", enemy: "🐱" },
@@ -909,7 +981,7 @@ countUp(document.getElementById("cheese"), 47, 2200);
 
   const mouse = { x: W / 2, y: H - 60, targetX: W / 2, squish: 0 };
   let items, parts, score, lives, state = "start", spawnT, time, flash = 0, keys = {};
-  let level, banner, shieldT, magnetT, combo;
+  let level, banner, shieldT, magnetT, combo, gameId = null, last = { score: 0, level: 0 };
 
   function reset() {
     items = []; parts = []; score = 0; lives = 3; spawnT = 0; time = 0; flash = 0;
@@ -1034,7 +1106,7 @@ countUp(document.getElementById("cheese"), 47, 2200);
     }
     ctx.restore();
 
-    if (banner) {
+    if (banner && state === "play") {
       const a = Math.min(1, banner.t / 30, (150 - banner.t) / 20 + .2);
       ctx.save();
       ctx.globalAlpha = Math.max(0, a);
@@ -1044,7 +1116,6 @@ countUp(document.getElementById("cheese"), 47, 2200);
       ctx.font = "600 18px Fredoka, sans-serif"; ctx.fillText(banner.sub, W / 2, 148);
       ctx.font = "700 30px Fredoka, sans-serif"; ctx.fillText(banner.text, W / 2, 182);
       ctx.restore();
-      if (--banner.t <= 0) banner = null;
     }
   }
 
@@ -1088,6 +1159,7 @@ countUp(document.getElementById("cheese"), 47, 2200);
         banner = { sub: "✈️ Weiter geht die Reise nach …", text: `${next.deco} ${next.name}!`, t: 150 };
         sound.level();
         burst(W / 2, H / 2, "🎉", 16);
+        live.textContent = `Weiter nach ${next.name}!`;
       }
     }
     updateHud();
@@ -1097,6 +1169,8 @@ countUp(document.getElementById("cheese"), 47, 2200);
     state = "over";
     updateHud();
     sound.over();
+    last = { score, level };
+    live.textContent = `Spiel vorbei: ${score} Punkte.`;
     const isBest = score > best;
     if (isBest) { best = score; store.set("best", best); bestEl.textContent = best; }
     document.getElementById("ovLine").textContent = rand(gameOverLines);
@@ -1108,33 +1182,40 @@ countUp(document.getElementById("cheese"), 47, 2200);
     setTimeout(() => { overlay.hidden = false; if (isBest && score > 0) confetti(); }, 500);
   }
 
-  function loop() {
-    if (state === "play") {
-      time++;
-      spawnT -= 1;
-      if (spawnT <= 0) { spawn(); spawnT = Math.max(14, 46 - time / 70 - level * 2); }
+  // Game logic runs at a fixed 60 steps per second, independent of the screen's refresh rate (60/120/144 Hz).
+  function update() {
+    time++;
+    spawnT -= 1;
+    if (spawnT <= 0) { spawn(); spawnT = Math.max(14, 46 - time / 70 - level * 2); }
 
-      if (keys.ArrowLeft) mouse.targetX -= 9;
-      if (keys.ArrowRight) mouse.targetX += 9;
-      mouse.targetX = Math.max(35, Math.min(W - 35, mouse.targetX));
-      mouse.x += (mouse.targetX - mouse.x) * .3;
-      mouse.squish *= .85;
-      if (flash > 0) flash--;
-      if (shieldT > 0) shieldT--;
-      if (magnetT > 0) magnetT--;
+    if (keys.ArrowLeft) mouse.targetX -= 9;
+    if (keys.ArrowRight) mouse.targetX += 9;
+    mouse.targetX = Math.max(35, Math.min(W - 35, mouse.targetX));
+    mouse.x += (mouse.targetX - mouse.x) * .3;
+    mouse.squish *= .85;
+    if (flash > 0) flash--;
+    if (shieldT > 0) shieldT--;
+    if (magnetT > 0) magnetT--;
+    if (banner && --banner.t <= 0) banner = null;
 
-      for (const it of items) {
-        it.y += it.vy; it.rot += it.vr;
-        if (it.wob) { it.x += Math.sin(time / 12 + it.rot) * it.wob; it.x = Math.max(20, Math.min(W - 20, it.x)); }
-        const good = it.kind === "good" || it.kind === "cake";
-        if (magnetT > 0 && good && it.y > H * .25) { it.x += (mouse.x - it.x) * .09; it.y += 1.5; }
-        const dx = Math.abs(it.x - mouse.x), dy = Math.abs(it.y - mouse.y);
-        if (!it.dead && dx < 42 && dy < 36) { catchItem(it); if (state !== "play") break; }
-        if (!it.dead && good && it.y > H) combo = 0;
-      }
-      items = items.filter(it => !it.dead && it.y < H + 40);
+    for (const it of items) {
+      it.y += it.vy; it.rot += it.vr;
+      if (it.wob) { it.x += Math.sin(time / 12 + it.rot) * it.wob; it.x = Math.max(20, Math.min(W - 20, it.x)); }
+      const good = it.kind === "good" || it.kind === "cake";
+      if (magnetT > 0 && good && it.y > H * .25) { it.x += (mouse.x - it.x) * .09; it.y += 1.5; }
+      const dx = Math.abs(it.x - mouse.x), dy = Math.abs(it.y - mouse.y);
+      if (!it.dead && dx < 42 && dy < 36) { catchItem(it); if (state !== "play") break; }
+      if (!it.dead && good && it.y > H) combo = 0;
     }
+    items = items.filter(it => !it.dead && it.y < H + 40);
+  }
 
+  function updateParts() {
+    for (const p of parts) { p.x += p.vx; p.y += p.vy; p.vy += p.g ?? .25; p.life--; }
+    parts = parts.filter(p => p.life > 0);
+  }
+
+  function draw() {
     drawWorld();
     for (const it of items) {
       ctx.save(); ctx.translate(it.x, it.y);
@@ -1149,45 +1230,89 @@ countUp(document.getElementById("cheese"), 47, 2200);
       ctx.restore();
     }
     for (const p of parts) {
-      p.x += p.vx; p.y += p.vy; p.vy += p.g ?? .25; p.life--;
       ctx.globalAlpha = Math.max(0, p.life / 40);
       ctx.font = p.color ? `700 ${p.size}px Fredoka, sans-serif` : `${p.size}px serif`;
       ctx.fillStyle = p.color || "#000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillText(p.txt, p.x, p.y); ctx.globalAlpha = 1;
     }
-    parts = parts.filter(p => p.life > 0);
 
     if (flash % 8 < 4) drawMouse();
-    if (state === "play") drawStatus();
+    if (state === "play" || state === "pause") drawStatus();
 
     if (state === "start") {
       centerText([["🐭 Käse-Regen", 38, -72], ["Sammle 🧀 und 🍰", 22, -24], ["Weiche den 🐱 aus!", 22, 8], ["Reise von 🏡 bis zum 🌕", 20, 40], ["👆 Tippen zum Starten", 20, 86]]);
+    } else if (state === "pause") {
+      centerText([["⏸️ Pause", 38, -40], ["Die Maus wartet auf dich.", 22, 8], ["👆 Tippen zum Weiterspielen", 20, 60]]);
     }
-    requestAnimationFrame(loop);
   }
+
+  // Only animates while something moves; idle screens (start, pause, game over) cost no battery.
+  const STEP = 1000 / 60;
+  let raf = 0, lastT = 0, acc = 0;
+  function frame(t) {
+    acc += Math.min(250, t - lastT); lastT = t;
+    while (acc >= STEP) {
+      if (state === "play") update();
+      updateParts();
+      acc -= STEP;
+    }
+    draw();
+    raf = state === "play" || parts.length ? requestAnimationFrame(frame) : 0;
+  }
+  function kick() {
+    if (raf) return;
+    lastT = performance.now(); acc = 0;
+    raf = requestAnimationFrame(frame);
+  }
+  onLookChange = kick;
 
   function toCanvasX(clientX) {
     const r = cv.getBoundingClientRect();
     return (clientX - r.left) * (W / r.width);
   }
   function start() {
-    if (state === "play") return;
+    if (state === "play" || state === "pause") return;
     reset(); state = "play"; overlay.hidden = true;
     banner = { sub: "Los geht's! Erster Stopp:", text: "🏡 Zuhause", t: 110 };
+    // The server remembers when this game started, so it can reject impossible scores.
+    gameId = fetch(API + "/game", { method: "POST" }).then(r => r.json()).then(d => d.id).catch(() => null);
+    kick();
+  }
+  function pause() {
+    if (state !== "play") return;
+    state = "pause"; keys = {}; kick();
+  }
+  function resume() {
+    if (state !== "pause") return;
+    state = "play"; kick();
   }
 
-  cv.addEventListener("pointerdown", e => { if (state === "start") start(); mouse.targetX = toCanvasX(e.clientX); });
+  cv.addEventListener("pointerdown", e => {
+    if (state === "start") start(); else if (state === "pause") resume();
+    mouse.targetX = toCanvasX(e.clientX);
+  });
   cv.addEventListener("pointermove", e => { if (state === "play") mouse.targetX = toCanvasX(e.clientX); });
   addEventListener("keydown", e => {
-    if (!["ArrowLeft", "ArrowRight", " "].includes(e.key) || e.target.tagName === "INPUT") return;
+    if (!["ArrowLeft", "ArrowRight", " ", "p", "P", "Escape"].includes(e.key) || e.target.tagName === "INPUT") return;
     const r = cv.getBoundingClientRect();
     if (r.bottom < 0 || r.top > innerHeight) return;
+    if (e.key === "Escape") return pause();
     e.preventDefault();
+    if (e.key === "p" || e.key === "P") return state === "pause" ? resume() : pause();
     if (e.key !== " ") keys[e.key] = true;
     if (state === "start" || (state === "over" && e.key === " ")) start();
+    else if (state === "pause") resume();
   });
+  // Pause automatically when the tab is hidden or the game is scrolled out of view.
+  addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") pause(); });
+  new IntersectionObserver(([en]) => { if (!en.isIntersecting) pause(); }, { threshold: .4 }).observe(cv);
   addEventListener("keyup", e => { keys[e.key] = false; });
   document.getElementById("againBtn").addEventListener("click", start);
+  document.getElementById("shareBtn").addEventListener("click", async () => {
+    const L = LEVELS[last.level];
+    const msg = await share(`🧀 Ich habe beim Käse-Regen ${last.score} Punkte gesammelt und die kleine Maus bis ${L.deco} ${L.name} gebracht! Schaffst du mehr?`, `${location.origin}/#spiel`);
+    if (msg) ovMsg.textContent = msg;
+  });
 
   // Leaderboard
   let myEntryAt = store.get("myEntryAt", []);
@@ -1214,7 +1339,9 @@ countUp(document.getElementById("cheese"), 47, 2200);
     const btn = scoreForm.querySelector("button");
     btn.disabled = true; ovMsg.textContent = "Wird eingetragen …";
     try {
-      const res = await fetch(API + "/scores", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, score }) });
+      const game = await gameId;
+      if (!game) throw new Error("Bestenliste gerade nicht erreichbar 🙈");
+      const res = await fetch(API + "/scores", { method: "POST", body: JSON.stringify({ name, score, game }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       if (data.rank) {
@@ -1236,12 +1363,13 @@ countUp(document.getElementById("cheese"), 47, 2200);
   if (location.hash === "#debug") {
     window.game = {
       give: (kind, n = 1) => { for (let i = 0; i < n && state === "play"; i++) catchItem({ kind, x: W / 2, y: H / 2 }); },
-      get state() { return { state, score, lives, level: LEVELS[level].name }; },
+      get state() { return { state, score, lives, time, level: LEVELS[level].name }; },
     };
   }
 
   reset();
-  loop();
+  kick();
+  document.fonts?.ready.then(kick);
 })();
 </script>
 </body>
