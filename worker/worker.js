@@ -1,6 +1,5 @@
 // API für kleinemaus.wenz.io – Bestenliste, Fütter-Zähler und KI-Reiseziele.
-// Bindings: STATE (Durable Object, hält alle Daten in SQLite), AI (Workers AI), LIMITER (Edge-Rate-Limit pro IP),
-// KV (nur noch für die einmalige Übernahme alter Daten)
+// Bindings: STATE (Durable Object, hält alle Daten in SQLite), AI (Workers AI), LIMITER (Edge-Rate-Limit pro IP)
 
 import { DurableObject } from "cloudflare:workers";
 
@@ -56,14 +55,6 @@ export class MouseState extends DurableObject {
       CREATE TABLE IF NOT EXISTS limits (k TEXT PRIMARY KEY, n INTEGER, reset INTEGER);
       CREATE TABLE IF NOT EXISTS games (id TEXT PRIMARY KEY, started INTEGER);
     `);
-    // One-time import of the data that used to live in KV.
-    if (!this.sql.exec("SELECT 1 FROM counters WHERE k = 'migrated'").toArray().length && this.env.KV) {
-      const [scores, trips, stats] = await Promise.all(["scores", "trips", "stats"].map(k => this.env.KV.get(k, "json")));
-      for (const s of scores || []) this.sql.exec("INSERT INTO scores VALUES (?, ?, ?)", s.name, s.score, s.at);
-      for (const t of trips || []) this.sql.exec("INSERT OR IGNORE INTO trips VALUES (?, ?, ?)", t.id, JSON.stringify(t), t.at);
-      if (stats) for (const k of ["fed", "cuddled"]) this.sql.exec("INSERT OR REPLACE INTO counters VALUES (?, ?)", k, stats[k] || 0);
-      this.sql.exec("INSERT INTO counters VALUES ('migrated', 1)");
-    }
   }
 
   // Fixed-window rate limit. Returns true when the caller is over the limit.

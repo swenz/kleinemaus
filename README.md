@@ -11,7 +11,7 @@ Komplett von einer KI (Claude) gebaut.
 ## Aufbau
 
 - `index.html` – die ganze Seite, statisch über GitHub Pages
-- `worker/` – Cloudflare Worker unter `kleinemaus-api.wenz.io` (Bestenliste, Fütter-Zähler, KI-Reisen mit Workers AI). Alle Daten liegen in einem Durable Object mit SQLite; KV wird nur noch einmalig beim ersten Start ausgelesen, um alte Daten zu übernehmen.
+- `worker/` – Cloudflare Worker unter `kleinemaus-api.wenz.io` (Bestenliste, Fütter-Zähler, KI-Reisen mit Workers AI). Alle Daten liegen in einem Durable Object mit SQLite.
 
 Kosten bleiben im Inklusivvolumen von Workers Paid: höchstens 200 KI-Reisen pro Tag (`MAX_TRIPS_PER_DAY`), ohne Reasoning und mit JSON-Modus, also weit unter einem Zehntelcent pro Reise.
 

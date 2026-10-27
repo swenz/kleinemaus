@@ -245,7 +245,8 @@
   .trips-empty { text-align: center; color: var(--muted); grid-column: 1 / -1; }
 
   /* Game */
-  .game-card { max-width: 640px; margin: 0 auto; padding: 18px; }
+  /* Hug the playing field (52.5vh wide, see .stage) plus padding, so there's no empty band beside it on desktop. */
+  .game-card { max-width: clamp(380px, calc(52.5vh + 36px), 640px); margin: 0 auto; padding: 18px; }
   .hud { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.1rem; padding: 4px 8px 12px; gap: 10px; }
   .hud .hearts { letter-spacing: 1px; }
   .icon-btn { background: var(--pink-soft); color: var(--ink); border: 0; border-radius: 50%; width: 38px; height: 38px; font-size: 1.1rem; cursor: pointer; }
@@ -878,6 +879,7 @@ countUp(document.getElementById("cheese"), 47, 2200);
     pic.className = "pic"; pic.style.background = PIC_BG[parseInt(t.id, 16) % PIC_BG.length] || PIC_BG[0];
     pic.textContent = t.emoji;
     const day = document.createElement("div"); day.className = "day"; day.textContent = `${t.place} · ${ago(t.at)}`;
+    day.dataset.at = t.at; day.dataset.place = t.place;
     const wished = document.createElement("div"); wished.className = "wished"; wished.textContent = t.wish ? `Wunschziel: „${t.wish}“` : "Wunschziel: geheim 🤫";
     const h = document.createElement("h3"); h.textContent = t.title;
     const p = document.createElement("p");
@@ -902,6 +904,11 @@ countUp(document.getElementById("cheese"), 47, 2200);
     }
     return a;
   }
+
+  // Keep "vor 5 Min." honest while the page stays open.
+  setInterval(() => {
+    for (const d of list.querySelectorAll(".day[data-at]")) d.textContent = `${d.dataset.place} · ${ago(+d.dataset.at)}`;
+  }, 60000);
 
   function renderEmpty() {
     if (!list.children.length) list.innerHTML = '<p class="trips-empty">Noch keine Wunschreisen. Sei die erste Person, die die Maus irgendwohin schickt! 🐭</p>';
